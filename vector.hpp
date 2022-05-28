@@ -254,14 +254,23 @@ namespace ft
 				return this->_M_start[__n];
 			}
 
+			// Get first elem
 			reference front() {
 				return *begin();
 			}
 
+			// Get first elem
 			const_reference front() const {
 				return *begin();
 			}
 
+			reference back() {
+				return end()[-1];
+			}
+
+			const_reference back() const {
+				return end()[-1];
+			}
 
 
 			
