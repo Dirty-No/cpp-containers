@@ -272,6 +272,14 @@ namespace ft
 				return end()[-1];
 			}
 
+			bool empty() const {
+				return begin() == end();
+			}
+
+			T *data() {
+				return empty() ? 0 : this->_M_start;
+			}
+
 
 			
 	};
