@@ -147,6 +147,24 @@ _ForwardIterator __uninitialized_copy_a(_InputIterator __first, _InputIterator _
   }
 }
 
+//unitialized fill with allocator and n bytes
+template<typename _ForwardIterator, typename _Size, typename _Tp, typename _Allocator>
+_ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,
+  const _Tp& __x, _Allocator& __alloc) {
+  _ForwardIterator __cur = __first;
+  try
+  {
+    for (; __n > 0; --__n, (void) ++__cur)
+      __alloc.construct(ft::__addressof(*__cur), __x);
+    return __cur;
+  }
+  catch(...)
+  {
+    std::_Destroy(__first, __cur, __alloc);
+    throw;
+  }
+}
+
 
 }
 
