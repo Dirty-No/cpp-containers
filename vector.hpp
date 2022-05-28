@@ -243,6 +243,28 @@ namespace ft
 				// Get elem
 				return (*this)[__n];
 			}
+			
+			// No check no exception access operator
+			reference operator[](size_type __n) {
+				return this->_M_start[__n];
+			}
+
+			// No check no exception access operator
+			const_reference operator[](size_type __n) const {
+				return this->_M_start[__n];
+			}
+
+			reference front() {
+				return *begin();
+			}
+
+			const_reference front() const {
+				return *begin();
+			}
+
+
+
+			
 	};
 };
 
