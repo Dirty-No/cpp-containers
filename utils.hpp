@@ -8,6 +8,7 @@
 #include <typeinfo>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stddef.h>
 
 namespace ft {
 
@@ -227,6 +228,37 @@ _ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,
     throw;
   }
 }
+
+/* ITERATOR TRAITS */
+// https://stackoverflow.com/questions/6742008/what-are-the-typical-use-cases-of-an-iterator-trait
+
+// struct for "real iterators" a.k.a. not pointer
+// Types are forwarded from the classes definitions
+// iterator_traits provides an uniform interface to use pointers and user-defined iterators in the same way 
+template <class T>
+struct iterator_traits {
+  typedef typename T::value_type value_type;
+  typedef typename T::difference_type difference_type;
+  typedef typename T::iterator_category iterator_category;
+  typedef typename T::pointer pointer;
+  typedef typename T::reference reference;
+};
+
+// pointer specialization
+template <typename T>
+struct iterator_traits<T*>
+{
+    typedef std::random_access_iterator_tag iterator_category;
+    typedef T                               value_type;
+    typedef T*                              pointer;
+    typedef T&                              reference;
+    typedef std::ptrdiff_t                  difference_type;
+};
+
+/* REVERSE ITERATOR */
+
+
+
 
 
 }
