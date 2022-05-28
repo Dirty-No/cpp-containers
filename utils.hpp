@@ -1,73 +1,71 @@
 #ifndef _FT_UTILS_HPP
 # define _FT_UTILS_HPP
 
+#include <cstdlib>
+#include <exception>
+#include <stdexcept>
+#include <new>
+#include <typeinfo>
+#include <stdarg.h>
+#include <stdio.h>
+
 namespace ft {
 
-  // Helper for exception objects in <except>
+// https://code.woboq.org/gcc/libstdc++-v3/src/c++11/functexcept.cc.html
+void
+  __throw_bad_exception()
+  { throw (std::bad_exception()); }
   void
-  __throw_bad_exception(void) __attribute__((__noreturn__));
+  __throw_bad_alloc()
+  { throw (std::bad_alloc()); }
+  void
+  __throw_bad_cast()
+  { throw (std::bad_cast()); }
+  void
+  __throw_bad_typeid()
+  { throw (std::bad_typeid()); }
+  void
+  __throw_logic_error(const char* __s __attribute__((unused)))
+  { throw (std::logic_error(__s)); }
+  void
+  __throw_domain_error(const char* __s __attribute__((unused)))
+  { throw (std::domain_error(__s)); }
+  void
+  __throw_invalid_argument(const char* __s __attribute__((unused)))
+  { throw (std::invalid_argument(__s)); }
+  void
+  __throw_length_error(const char* __s __attribute__((unused)))
+  { throw (std::length_error(__s)); }
+  void
+  __throw_out_of_range(const char* __s __attribute__((unused)))
+  { throw (std::out_of_range(__s)); }
+  void
+  __throw_out_of_range_fmt(const char* __fmt, ...)
+  {
+    const size_t __len = __builtin_strlen(__fmt);
+    // We expect at most 2 numbers, and 1 short string. The additional
+    // 512 bytes should provide more than enough space for expansion.
+    const size_t __alloca_size = __len + 512;
+    char *const __s = static_cast<char*>(__builtin_alloca(__alloca_size));
+    va_list __ap;
+    va_start(__ap, __fmt);
+    snprintf(__s, __alloca_size, __fmt, __ap);
+    throw (std::out_of_range(__s));
+    va_end(__ap);  // Not reached.
+  }
+  void
+  __throw_runtime_error(const char* __s __attribute__((unused)))
+  { throw (std::runtime_error(__s)); }
+  void
+  __throw_range_error(const char* __s __attribute__((unused)))
+  { throw (std::range_error(__s)); }
+  void
+  __throw_overflow_error(const char* __s __attribute__((unused)))
+  { throw (std::overflow_error(__s)); }
+  void
+  __throw_underflow_error(const char* __s __attribute__((unused)))
+  { throw (std::underflow_error(__s)); }
 
-  // Helper for exception objects in <new>
-  void
-  __throw_bad_alloc(void) __attribute__((__noreturn__));
-
-  // Helper for exception objects in <typeinfo>
-  void
-  __throw_bad_cast(void) __attribute__((__noreturn__));
-
-  void
-  __throw_bad_typeid(void) __attribute__((__noreturn__));
-
-  // Helpers for exception objects in <stdexcept>
-  void
-  __throw_logic_error(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_domain_error(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_invalid_argument(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_length_error(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_out_of_range(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_out_of_range_fmt(const char*, ...) __attribute__((__noreturn__))
-    __attribute__((__format__(__gnu_printf__, 1, 2)));
-
-  void
-  __throw_runtime_error(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_range_error(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_overflow_error(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_underflow_error(const char*) __attribute__((__noreturn__));
-
-  // Helpers for exception objects in <ios>
-  void
-  __throw_ios_failure(const char*) __attribute__((__noreturn__));
-
-  void
-  __throw_ios_failure(const char*, int) __attribute__((__noreturn__));
-
-  // Helpers for exception objects in <system_error>
-  void
-  __throw_system_error(int) __attribute__((__noreturn__));
-
-  // Helpers for exception objects in <future>
-  void
-  __throw_future_error(int) __attribute__((__noreturn__));
-
-  // Helpers for exception objects in <functional>
-  void
-  __throw_bad_function_call() __attribute__((__noreturn__));
 
 template<class T, T v>
 struct integral_constant {
