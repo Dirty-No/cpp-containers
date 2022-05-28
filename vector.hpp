@@ -235,6 +235,14 @@ namespace ft
 				// Get elem
 				return (*this)[__n];
 			}
+
+			const_reference at( size_type pos ) const {
+				// Throw pretty exception when out of range
+				_M_range_check(__n);
+
+				// Get elem
+				return (*this)[__n];
+			}
 	};
 };
 
