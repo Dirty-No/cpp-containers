@@ -272,13 +272,21 @@ namespace ft
 				return end()[-1];
 			}
 
+			// True if empty; false if not
 			bool empty() const {
 				return begin() == end();
 			}
 
+			// Return underlying buffer
 			T *data() {
 				return empty() ? 0 : this->_M_start;
 			}
+
+			void clear() {
+				// Erase whole buffer
+				_M_erase_at_end(this->_M_start);
+			}
+			
 
 
 			
