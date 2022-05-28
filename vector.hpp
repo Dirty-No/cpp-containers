@@ -110,7 +110,7 @@ namespace ft
 			/// Safety check used only from at().
 			void _M_range_check(size_type __n) const {
 				if (__n >= this->size())
-					__throw_out_of_range_fmt(__N("vector::_M_range_check: __n "
+					__throw_out_of_range_fmt(__N("ft::vector::_M_range_check: __n "
 									"(which is %zu) >= this->size() "
 									"(which is %zu)"),
 								__n, this->size());
@@ -236,7 +236,7 @@ namespace ft
 				return (*this)[__n];
 			}
 
-			const_reference at( size_type pos ) const {
+			const_reference at( size_type __n ) const {
 				// Throw pretty exception when out of range
 				_M_range_check(__n);
 
@@ -290,7 +290,7 @@ namespace ft
 			void reserve(size_type __n) {
 				// Ensure new size is allocable
 				if (__n > this->max_size())
-					__throw_length_error("vector::reserve");
+					__throw_length_error("ft::vector::reserve");
 				if (this->capacity() < __n) {
 					const size_type __old_size = size();
 
@@ -313,6 +313,7 @@ namespace ft
 					this->_M_impl._M_end_of_storage = this->_M_impl._M_start + __n;
 				}
 			}
+			
 
 
 
