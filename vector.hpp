@@ -1,13 +1,12 @@
 #ifndef  VECTOR_HPP
 # define VECTOR_HPP
-
 # include <memory> // std::allocator
 # include <algorithm> // std::copy
 # include "utils.hpp"
 
 namespace ft
 {
-
+	// https://en.cppreference.com/w/cpp/container/vector
 	template<
 		class T,
 		class Allocator = std::allocator<T>
@@ -47,38 +46,92 @@ namespace ft
 
 			void _M_create_storage(size_type __n)
 			{
+				// Allocate buffer
 				this->_M_start = _M_allocate(__n);
+
+				// Init end pos to start
 				this->_M_finish = this->_M_start;
+
+				// Init end of storage
 				this->_M_end_of_storage = this->_M_start + __n;
 			}
 
+			// Allocates a new buffer and copies the range in it
 			template <typename _ForwardIterator>
 			pointer _M_allocate_and_copy(size_type __n, _ForwardIterator __first, _ForwardIterator __last) {
+				// Allocate new buffer
 				pointer __result = this->_M_allocate(__n);
+
+				// Copy data into buffer
 				// https://stackoverflow.com/questions/30158192/difference-between-stduninitialized-copy-stdcopy
 				std::uninitialized_copy(__first, __last, __result);
+
+				// return new buffer
 				return __result;
+			}
+
+			// Erase everything after pos and set the end to pos
+			// pos must be before _M_finish
+			void _M_erase_at_end(pointer __pos) {
+				// WIP: Unsure if this check is better than __pos == _M_finish
+				if (size_type __n = this->_M_finish - __pos)
+				{
+					// Destroy whole range
+					ft::__destroy(__pos, this->_M_finish, this->_M_allocator);
+					
+					// Update end position
+					this->_M_finish = __pos;
+				}
+			}
+
+			// Shrink/Grow vector to __n and fill with __val
+			void _M_fill_assign(size_type __n, const value_type& __val) {
+				if (__n > capacity()) {
+					// Be lazy and use the fill constructor, current vector will be cleaned with destructor
+					vector __tmp(__n, __val, this->_M_allocator);
+					__tmp.swap(*this);
+				}
+				else if (__n > size()) {
+					// Fill initialized part
+					std::fill(begin(), end(), __val);
+
+					// Compute additional size
+					const size_type __add = __n - size();
+
+					// Fill uninitialized part
+					this->_M_finish = ft::__uninitialized_fill_n_a(this->_M_finish,
+					  __add, __val, this->_M_allocator);
+				}
+				else
+					// Fill up to N and erase extra data
+					_M_erase_at_end(std::fill_n(this->_M_start, __n, __val));
 			}
 
 		public:
 			~vector() {
+				// Simply deallocate the buffer
 				_M_deallocate(this->_M_start, this->_M_end_of_storage - this->_M_start);
 			}
 
+			// Init to default values
 			vector() : _M_start(), _M_finish(), _M_end_of_storage() { }
 
+			// Allocate buffer and init pointers
 			vector(size_type __n) {
 				_M_create_storage(__n);
 			}
 
+			// Simple diff
 			size_type capacity() const {
 				return this->_M_end_of_storage - this->_M_start;
 			}
 
+			// Iterators are literally pointers
 			iterator begin() {
 				return iterator(this->_M_start);
 			}
 
+			// Get the cont_iterator
 			const_iterator begin() const {
 				return const_iterator(this->_M_start);
 			}
@@ -91,11 +144,12 @@ namespace ft
 				return const_iterator(this->_M_finish);
 			}
 
+			// Simple diff
 			size_type size() const {
 				return size_type(this->_M_finish - this->_M_start);
 			}
 
-			// this shit's actually arbitrary af
+			// this shit's actually arbitrary af and requires compiler extensions
 			size_type max_size() const {
 				// Ported from c++?? to c++98 from stl_vector.hpp
 				// std::distance(begin(), end()) cannot be greater than PTRDIFF_MAX,
@@ -107,21 +161,38 @@ namespace ft
 				return (std::min)(__diffmax, __allocmax);
 			}
 
+			// Copies a vector and handles garbage cleaning
 			vector & operator=(const vector & __x) {
+				// Self referencing check
 				if (&__x != this) {
+					// Get target len
 					const size_type __xlen = __x.size();
 					if (__xlen > capacity()) {
+						// Get a new buffer with new data
 						pointer __tmp =  _M_allocate_and_copy(__xlen, __x.begin(), __x.end());
+						
+						// Destroy current buffer
 						__destroy(this->_M_start, this->_M_finish, this->_M_allocator);
+
+						// Deallocate current buffer
 						_M_deallocate(this->_M_start, this->_M_finish - this->_M_start);
+
+						// Set _M_start to new_buffer start
 						this->_M_start = __tmp;
+
+						// Set end of storage to new buffer's end
 						this->_M_end_of_storage = this->_M_start +__xlen;
 					}
 					else if (size() >= __xlen) {
+						// Copy new objects and destroy out of bond ones
 						__destroy(std::copy(__x.begin(), __x.end(), begin()), end(), this->_M_allocator);
 					}
 					else {
+						// here, this->size is lower but capacity is higher
+						// Copy to 'this' initialized part
 						std::copy(__x._M_start, __x._M_start + size(), this->_M_start);
+
+						// Copy to 'this' uninitialized part
 						ft::__uninitialized_copy_a(__x._M_start + size(), __x._M_finish, this->_M_finish, this->_M_allocator);
 					}
 					this->_M_finish = this->_M_start + __xlen;
@@ -129,8 +200,23 @@ namespace ft
 				return *this;
 			}
 
+			// allocator getter
 			allocator_type get_allocator() const {
 				return this->_M_allocator;
+			}
+
+			// Fills __n bytes with __val starting from _M_start
+			// https://en.cppreference.com/w/cpp/container/vector/assign
+			void	assign(size_type __n, const value_type& __val){
+				_M_fill_assign(__n, __val);
+			}
+
+			// simple swap, not sure if there's a better way
+			void swap(vector& __x) {
+				std::swap(this->_M_allocator, __x._M_allocator);
+				std::swap(this->_M_end_of_storage, __x._M_end_of_storage);
+				std::swap(this->_M_start, __x._M_start);
+				std::swap(this->_M_finish, __x._M_finish);
 			}
 
 
