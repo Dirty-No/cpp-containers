@@ -286,7 +286,34 @@ namespace ft
 				// Erase whole buffer
 				_M_erase_at_end(this->_M_start);
 			}
-			
+
+			void reserve(size_type __n) {
+				// Ensure new size is allocable
+				if (__n > this->max_size())
+					__throw_length_error("vector::reserve");
+				if (this->capacity() < __n) {
+					const size_type __old_size = size();
+
+					// Allocate new buffer and copy existing data in it
+					pointer __tmp = _M_allocate_and_copy(__n, this->_M_start, this->_M_finish);
+
+					// Destroy old data
+					ft::__destroy(this->_M_start, this->_M_finish, this->_M_allocator);
+
+					// Deallocate entire old buffer
+					_M_deallocate(this->_M_start, this->_M_end_of_storage - this->_M_start);
+
+					// Set start to new allocated buffer
+					this->_M_impl._M_start = __tmp;
+
+					// Set _finish to end of existing elements
+					this->_M_impl._M_finish = __tmp + __old_size;
+
+					// Set end_of_storage to end of allocated memory
+					this->_M_impl._M_end_of_storage = this->_M_impl._M_start + __n;
+				}
+			}
+
 
 
 			
