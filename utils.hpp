@@ -13,6 +13,7 @@
 namespace ft {
 
 // https://code.woboq.org/gcc/libstdc++-v3/src/c++11/functexcept.cc.html
+// Exception helpers
 void
   __throw_bad_exception()
   { throw (std::bad_exception()); }
