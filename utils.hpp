@@ -166,7 +166,7 @@ struct is_integral
 // # endif
 
 
-/* why do not they just do that */
+/* why do they not just do that */
 # ifndef __ft_builtin_addressof
 #  define __ft_builtin_addressof(obj) &obj
 # endif
@@ -454,7 +454,29 @@ class reverse_iterator {
 
 };
 
+/* ENABLE_IF */
+// https://en.cppreference.com/w/cpp/types/enable_if
+// it is c++11 but annoying s*** subject wants you to do it anyway
+// https://stackoverflow.com/questions/61557539/how-can-i-use-my-custom-enable-if-in-c98
+template<bool B, class T = void>
+struct enable_if {};
+ 
+template<class T>
+struct enable_if<true, T> { typedef T type; };
 
+/* LEXICOGRAPHICAL COMPARE */
+// https://en.cppreference.com/w/cpp/algorithm/lexicographical_compare
+template<class InputIt1, class InputIt2, class Compare>
+bool lexicographical_compare(InputIt1 first1, InputIt1 last1,
+                             InputIt2 first2, InputIt2 last2,
+                             Compare comp)
+{
+    for ( ; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2 ) {
+        if (comp(*first1, *first2)) return true;
+        if (comp(*first2, *first1)) return false;
+    }
+    return (first1 == last1) && (first2 != last2);
+}
 
 }
 
