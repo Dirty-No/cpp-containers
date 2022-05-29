@@ -337,9 +337,32 @@ class reverse_iterator {
       return *this;
     }
 
+  // The underlying iterator must be a Random Access Iterator.
+  reverse_iterator operator+(difference_type __n) const {
+    return reverse_iterator(current - __n);
+  }
 
+  // The underlying iterator must be a Random Access Iterator.
+  reverse_iterator& operator+=(difference_type __n) {
+    current -= __n;
+    return *this;
+  }
+  
+  // The underlying iterator must be a Random Access Iterator.
+  reverse_iterator operator-(difference_type __n) const {
+    return reverse_iterator(current + __n);
+  }
 
+  // The underlying iterator must be a Random Access Iterator.
+  reverse_iterator& operator-=(difference_type __n) {
+    current += __n;
+    return *this;
+  }
 
+  // The underlying iterator must be a Random Access Iterator.
+  reference operator[](difference_type __n) const {
+    return (*this)[__n];
+  }
 
 };
 
