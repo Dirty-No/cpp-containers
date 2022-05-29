@@ -232,9 +232,10 @@ _ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,
 /* ITERATOR TRAITS */
 // https://stackoverflow.com/questions/6742008/what-are-the-typical-use-cases-of-an-iterator-trait
 
-// struct for "real iterators" a.k.a. not pointer
-// Types are forwarded from the classes definitions
-// iterator_traits provides an uniform interface to use pointers and user-defined iterators in the same way 
+//  struct for "real iterators" a.k.a. not pointer
+//  Types are forwarded from the classes definitions
+//  iterator_traits provides an uniform interface to use pointers
+//    and user-defined iterators in the same way 
 template <class T>
 struct iterator_traits {
   typedef typename T::value_type value_type;
@@ -248,16 +249,25 @@ struct iterator_traits {
 template <typename T>
 struct iterator_traits<T*>
 {
-    typedef std::random_access_iterator_tag iterator_category;
-    typedef T                               value_type;
-    typedef T*                              pointer;
-    typedef T&                              reference;
-    typedef std::ptrdiff_t                  difference_type;
+  typedef std::random_access_iterator_tag iterator_category;
+  typedef T                               value_type;
+  typedef T*                              pointer;
+  typedef T&                              reference;
+  typedef std::ptrdiff_t                  difference_type;
 };
 
 /* REVERSE ITERATOR */
-
-
+// https://en.cppreference.com/w/cpp/iterator/reverse_iterator
+template<class Iter>
+class reverse_iterator {
+  public:
+    typedef Iter iterator_type;
+    typedef ft::iterator_traits<Iter>::iterator_category iterator_category;
+    typedef ft::iterator_traits<Iter>::value_type value_type;
+    typedef ft::iterator_traits<Iter>::difference_type difference_type;
+    typedef ft::iterator_traits<Iter>::pointer pointer;
+    typedef ft::iterator_traits<Iter>::reference reference;
+};
 
 
 
