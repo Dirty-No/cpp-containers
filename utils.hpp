@@ -443,6 +443,13 @@ class reverse_iterator {
 	      const reverse_iterator<_Iterator>& __x)
     { return reverse_iterator<_Iterator>(__x.base() - __n); }
 
+  template<typename _Iterator>
+  reverse_iterator& operator=(const reverse_iterator<_Iterator>& other) {
+      if (&other != this) {
+        this->current = other.base();
+      }
+      return *this;
+  }
 
 };
 
