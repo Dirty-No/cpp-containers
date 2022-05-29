@@ -269,6 +269,21 @@ class reverse_iterator {
     typedef ft::iterator_traits<_Iterator>::reference reference;
   protected:
     _Iterator current;
+
+  private:
+
+    // reverse_iterator must work uniformely with iterators and pointers
+    // so we have to run different code to ensure compatibilty
+    // this is used for operator->()
+
+    // When the given type is a pointer, return the pointer
+    template<typename _Tp>
+    static _Tp* _S_to_pointer(_Tp* __p) const { return __p; }
+
+    // When the given type is an iterator, return the operator->()
+    template <typename _Tp>
+    static _Tp* _S_to_pointer(_Tp __t) { return __t.operator->(); }
+
   public:
     reverse_iterator() : current() { }
 
@@ -278,7 +293,22 @@ class reverse_iterator {
     reverse_iterator(const reverse_iterator<_Iter>& __x) : current(__x.base()) { }
 
     iterator_type base() const { return current; }
-    
+
+    // https://en.cppreference.com/w/cpp/iterator/reverse_iterator/operator*
+    // Returns a reference to the element previous to current.
+    reference operator*() const {
+      _Iterator __tmp = current;
+      return *--__tmp;
+    }
+
+    // Returns a pointer to the element previous to current.
+    pointer operator->() const {
+        _Iterator __tmp = current;
+        --__tmp;
+        return _S_to_pointer(__tmp);
+     }
+
+     
 };
 
 
