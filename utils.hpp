@@ -258,15 +258,27 @@ struct iterator_traits<T*>
 
 /* REVERSE ITERATOR */
 // https://en.cppreference.com/w/cpp/iterator/reverse_iterator
-template<class Iter>
+template<class _Iterator>
 class reverse_iterator {
   public:
-    typedef Iter iterator_type;
-    typedef ft::iterator_traits<Iter>::iterator_category iterator_category;
-    typedef ft::iterator_traits<Iter>::value_type value_type;
-    typedef ft::iterator_traits<Iter>::difference_type difference_type;
-    typedef ft::iterator_traits<Iter>::pointer pointer;
-    typedef ft::iterator_traits<Iter>::reference reference;
+    typedef _Iterator iterator_type;
+    typedef ft::iterator_traits<_Iterator>::iterator_category iterator_category;
+    typedef ft::iterator_traits<_Iterator>::value_type value_type;
+    typedef ft::iterator_traits<_Iterator>::difference_type difference_type;
+    typedef ft::iterator_traits<_Iterator>::pointer pointer;
+    typedef ft::iterator_traits<_Iterator>::reference reference;
+  protected:
+    _Iterator current;
+  public:
+    reverse_iterator() : current() { }
+
+    explicit reverse_iterator(const reverse_iterator & __x) : current(__x.current) {}
+
+    template <typename _Iter>
+    reverse_iterator(const reverse_iterator<_Iter>& __x) : current(__x.base()) { }
+
+    iterator_type base() const { return current; }
+    
 };
 
 
