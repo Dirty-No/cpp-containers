@@ -308,7 +308,39 @@ class reverse_iterator {
         return _S_to_pointer(__tmp);
      }
 
-     
+    // increment / decrement operators
+    // https://docs.microsoft.com/en-us/cpp/cpp/increment-and-decrement-operator-overloading-cpp?view=msvc-170
+
+    // prefix increment operator
+    reverse_iterator& operator++() {
+      --current;
+      return *this;
+    }
+
+    // postfix increment operator
+    reverse_iterator operator++(int) {
+      reverse_iterator __tmp = *this;
+      --current;
+      return __tmp;
+    }
+
+    // prefix decrement operator
+    reverse_iterator operator--() { 
+      ++current;
+      return *this;
+    }
+
+    // postfix decrement operator
+    reverse_iterator operator--(int) {
+      reverse_iterator __tmp = *this;
+      ++current;
+      return *this;
+    }
+
+
+
+
+
 };
 
 
