@@ -155,6 +155,7 @@ namespace ft
 				return const_iterator(this->_M_finish);
 			}
 
+			// https://en.cppreference.com/w/cpp/container/vector/rbegin
 			reverse_iterator rbegin() {
 				return reverse_iterator(end()) ;
 			}
@@ -163,6 +164,7 @@ namespace ft
 				return const_reverse_iterator(end());
 			}
 
+			// https://en.cppreference.com/w/cpp/container/vector/rend
 			reverse_iterator rend() {
 				return reverse_iterator(begin());
 			}
