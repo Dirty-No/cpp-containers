@@ -315,13 +315,16 @@ namespace ft
 					const size_type __old_size = size();
 
 					// Allocate new buffer and copy existing data in it
-					pointer __tmp = _M_allocate_and_copy(__n, this->_M_start, this->_M_finish);
+					pointer __tmp = _M_allocate_and_copy(__n, this->_M_start,
+						this->_M_finish);
 
 					// Destroy old data
-					ft::__destroy(this->_M_start, this->_M_finish, this->_M_allocator);
+					ft::__destroy(this->_M_start, this->_M_finish,
+						this->_M_allocator);
 
 					// Deallocate entire old buffer
-					_M_deallocate(this->_M_start, this->_M_end_of_storage - this->_M_start);
+					_M_deallocate(this->_M_start,
+						 this->_M_end_of_storage - this->_M_start);
 
 					// Set start to new allocated buffer
 					this->_M_impl._M_start = __tmp;
@@ -332,6 +335,41 @@ namespace ft
 					// Set end_of_storage to end of allocated memory
 					this->_M_impl._M_end_of_storage = this->_M_impl._M_start + __n;
 				}
+			}
+
+			template<typename _Tp, typename _Alloc>
+			inline bool operator==(const vector<_Tp, _Alloc>& __x,
+				const vector<_Tp, _Alloc>& __y) {
+				return (__x.size() == __y.size()
+					&& std::equal(__x.begin(), __x.end(), __y.begin()));
+			}
+
+			template<typename _Tp, typename _Alloc>
+    		inline bool operator!=(const vector<_Tp, _Alloc>& __x,
+				const vector<_Tp, _Alloc>& __y) {
+				return !(__x == __y);
+			}
+
+			
+			// Based on operator<
+			template<typename _Tp, typename _Alloc>
+			inline bool operator>(const vector<_Tp, _Alloc>& __x,
+				const vector<_Tp, _Alloc>& __y) {
+					return __y < __x;
+			}
+
+			// Based on operator<
+			template<typename _Tp, typename _Alloc>
+			inline bool operator<=(const vector<_Tp, _Alloc>& __x,
+				const vector<_Tp, _Alloc>& __y) {
+					return !(__y < __x);
+			}
+
+			// Based on operator<
+			template<typename _Tp, typename _Alloc>
+			inline bool operator>=(const vector<_Tp, _Alloc>& __x,
+				const vector<_Tp, _Alloc>& __y) {
+					return !(__x < __y);
 			}
 
 			
