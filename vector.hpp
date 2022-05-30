@@ -327,13 +327,13 @@ namespace ft
 						 this->_M_end_of_storage - this->_M_start);
 
 					// Set start to new allocated buffer
-					this->_M_impl._M_start = __tmp;
+					this->_M_start = __tmp;
 
 					// Set _finish to end of existing elements
-					this->_M_impl._M_finish = __tmp + __old_size;
+					this->_M_finish = __tmp + __old_size;
 
 					// Set end_of_storage to end of allocated memory
-					this->_M_impl._M_end_of_storage = this->_M_impl._M_start + __n;
+					this->_M_end_of_storage = this->_M_start + __n;
 				}
 			}
 
