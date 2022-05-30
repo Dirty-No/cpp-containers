@@ -24,6 +24,8 @@ namespace ft
 			typedef	typename Allocator::const_pointer const_pointer;
 			typedef	value_type* iterator;
 			typedef	const value_type * const_iterator;
+			typedef ft::reverse_iterator<iterator> reverse_iterator;
+			typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
 		private:
 			// https://en.wikipedia.org/wiki/Hungarian_notation#:~:text=s_wheels%C2%A0%3A%20static%20member%20of%20a%20class
@@ -151,6 +153,22 @@ namespace ft
 
 			const_iterator end() const {
 				return const_iterator(this->_M_finish);
+			}
+
+			reverse_iterator rbegin() {
+				return reverse_iterator(end()) ;
+			}
+
+			const_reverse_iterator rbegin() const {
+				return const_reverse_iterator(end());
+			}
+
+			reverse_iterator rend() {
+				return reverse_iterator(begin());
+			}
+
+			const_reverse_iterator rend() const {
+				return const_reverse_iterator(begin());
 			}
 
 			// Simple diff
@@ -313,9 +331,6 @@ namespace ft
 					this->_M_impl._M_end_of_storage = this->_M_impl._M_start + __n;
 				}
 			}
-			
-
-
 
 			
 	};
