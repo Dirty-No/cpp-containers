@@ -14,59 +14,31 @@ namespace ft {
 
 // https://code.woboq.org/gcc/libstdc++-v3/src/c++11/functexcept.cc.html
 // Exception helpers
-void
-  __throw_bad_exception()
-  { throw (std::bad_exception()); }
-  void
-  __throw_bad_alloc()
-  { throw (std::bad_alloc()); }
-  void
-  __throw_bad_cast()
-  { throw (std::bad_cast()); }
-  void
-  __throw_bad_typeid()
-  { throw (std::bad_typeid()); }
-  void
-  __throw_logic_error(const char* __s __attribute__((unused)))
-  { throw (std::logic_error(__s)); }
-  void
-  __throw_domain_error(const char* __s __attribute__((unused)))
-  { throw (std::domain_error(__s)); }
-  void
-  __throw_invalid_argument(const char* __s __attribute__((unused)))
-  { throw (std::invalid_argument(__s)); }
-  void
-  __throw_length_error(const char* __s __attribute__((unused)))
-  { throw (std::length_error(__s)); }
-  void
-  __throw_out_of_range(const char* __s __attribute__((unused)))
-  { throw (std::out_of_range(__s)); }
-  void
-  __throw_out_of_range_fmt(const char* __fmt, ...)
-  {
-    const size_t __len = __builtin_strlen(__fmt);
-    // We expect at most 2 numbers, and 1 short string. The additional
-    // 512 bytes should provide more than enough space for expansion.
-    const size_t __alloca_size = __len + 512;
-    char *const __s = static_cast<char*>(__builtin_alloca(__alloca_size));
-    va_list __ap;
-    va_start(__ap, __fmt);
-    snprintf(__s, __alloca_size, __fmt, __ap);
-    throw (std::out_of_range(__s));
-    va_end(__ap);  // Not reached.
-  }
-  void
-  __throw_runtime_error(const char* __s __attribute__((unused)))
-  { throw (std::runtime_error(__s)); }
-  void
-  __throw_range_error(const char* __s __attribute__((unused)))
-  { throw (std::range_error(__s)); }
-  void
-  __throw_overflow_error(const char* __s __attribute__((unused)))
-  { throw (std::overflow_error(__s)); }
-  void
-  __throw_underflow_error(const char* __s __attribute__((unused)))
-  { throw (std::underflow_error(__s)); }
+void  __throw_bad_exception() { throw (std::bad_exception()); }
+void  __throw_bad_alloc() { throw (std::bad_alloc()); }
+void  __throw_bad_cast() { throw (std::bad_cast()); }
+void  __throw_bad_typeid() { throw (std::bad_typeid()); }
+void  __throw_logic_error(const char* __s) { (void) __s; throw (std::logic_error(__s)); }
+void  __throw_domain_error(const char* __s) { (void) __s; throw (std::domain_error(__s)); }
+void  __throw_invalid_argument(const char* __s) { (void) __s; throw (std::invalid_argument(__s)); }
+void  __throw_length_error(const char* __s) { (void) __s; throw (std::length_error(__s)); }
+void  __throw_out_of_range(const char* __s) { (void) __s; throw (std::out_of_range(__s)); }
+void  __throw_runtime_error(const char* __s) { (void) __s; throw (std::runtime_error(__s)); }
+void  __throw_range_error(const char* __s) { (void) __s; throw (std::range_error(__s)); }
+void  __throw_overflow_error(const char* __s) { (void) __s; throw (std::overflow_error(__s)); }
+void  __throw_underflow_error(const char* __s) { (void) __s; throw (std::underflow_error(__s)); }
+void  __throw_out_of_range_fmt(const char* __fmt, ...)  {
+  const size_t __len = __builtin_strlen(__fmt);
+  // We expect at most 2 numbers, and 1 short string. The additional
+  // 512 bytes should provide more than enough space for expansion.
+  const size_t __alloca_size = __len + 512;
+  char *const __s = static_cast<char*>(__builtin_alloca(__alloca_size));
+  va_list __ap;
+  va_start(__ap, __fmt);
+  snprintf(__s, __alloca_size, __fmt, __ap);
+  throw (std::out_of_range(__s));
+  va_end(__ap);  // Not reached.
+}
 
 
 template<class T, T v>
@@ -137,7 +109,7 @@ template<typename _Tp>
 struct remove_volatile<_Tp volatile>
 { typedef _Tp     type; };
 
-/// remove_cv
+/// remove_cv (const volatile)
 template<typename _Tp>
 struct remove_cv
 {
@@ -212,7 +184,9 @@ _ForwardIterator __uninitialized_copy_a(_InputIterator __first, _InputIterator _
   }
 }
 
-//unitialized fill with allocator and n bytes
+//  unitialized fill with allocator and n bytes
+//  Can't use std::unitialized_fill because iterator doesnt meet
+//  the requirements to simply do __first + __n
 template<typename _ForwardIterator, typename _Size, typename _Tp, typename _Allocator>
 _ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,
   const _Tp& __x, _Allocator& __alloc) {
