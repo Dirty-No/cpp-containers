@@ -1,7 +1,7 @@
 #ifndef  VECTOR_HPP
 # define VECTOR_HPP
 # include <memory> // std::allocator
-# include <algorithm> // std::copy
+# include <algorithm> // std::copy, std::max, std::min
 # include "utils.hpp"
 
 namespace ft
@@ -33,6 +33,27 @@ namespace ft
 			pointer _M_finish;
 			pointer _M_end_of_storage;
 			allocator_type _M_allocator;
+
+			// Throws an exception if __n > max_size.
+			// _M_allocator muse be initialized!
+			size_type _M_init_max_len_check(size_type __n)
+			{
+				if (__n > max_size())
+					__throw_length_error(
+						"cannot create ft::vector larger than max_size()"
+					);
+				return __n;
+			}
+
+			size_type _M_check_len(size_type __n, const char* __s) const {
+				if (max_size() - size() < __n)
+					__throw_length_error(__s);
+
+				const size_type __len = size() + (std::max)(size(), __n);
+				return (__len < size() || __len > max_size()) ?
+					max_size() : __len;
+			}
+
 
 			// https://en.cppreference.com/w/cpp/memory/allocator/deallocate
 			void _M_deallocate(pointer __p, size_type __n) {
@@ -100,7 +121,7 @@ namespace ft
 					// Compute additional size
 					const size_type __add = __n - size();
 
-					// Fill uninitialized part
+					// Fill uninitialized/unconstructed part
 					this->_M_finish = ft::__uninitialized_fill_n_a(this->_M_finish,
 					  __add, __val, this->_M_allocator);
 				}
@@ -127,10 +148,40 @@ namespace ft
 			// Init to default values
 			vector() : _M_start(), _M_finish(), _M_end_of_storage() { }
 
-			// Allocate buffer and init pointers
-			vector(size_type __n) {
-				_M_create_storage(__n);
+			explicit vector(allocator_type __a) {
+				this->_M_allocator = __a;
 			}
+
+
+			// Fill constructor
+			explicit vector(size_type __n, const value_type& __value = value_type(),
+				const allocator_type& __a = allocator_type())
+			: _M_allocator(__a) {
+				// Ensure __n is lower than max_size()
+				_M_init_max_len_check(__n);
+
+				// Allocate memory and init _M_start, _M_finish and _M_end_of_storage
+				_M_create_storage(__n);
+
+				// Fill the value and set _M_finish.
+				this->_M_finish = ft::__uninitialized_fill_n_a(this->_M_start, __n,
+					__value, this->_M_allocator);
+			}
+
+			// Copy constructor
+			vector(const vector& __x) {
+				// Allocate buffer and init start/finish/end_of_storage pointers
+				_M_create_storage(__x.size);
+
+				// Copy allocator
+				this->_M_allocator = __x.get_allocator();
+
+				// Copy __x's data into is' uninitialized buffer
+				this->_M_finish = ft::__uninitialized_copy_a(__x.begin(), __x.end(),
+				this->_M_start,
+				this->_M_allocator);
+			}
+
 
 			// Simple diff
 			size_type capacity() const {
@@ -178,12 +229,15 @@ namespace ft
 				return size_type(this->_M_finish - this->_M_start);
 			}
 
-			// this shit's actually arbitrary af and requires compiler extensions
+			// this shit's actually arbitrary af
 			size_type max_size() const {
 				// Ported from c++?? to c++98 from stl_vector.hpp
 				// std::distance(begin(), end()) cannot be greater than PTRDIFF_MAX,
 				// and realistically we can't store more than PTRDIFF_MAX/sizeof(T)
 				// (even if std::allocator_traits::max_size says we can).
+				
+				// Using type_traits implemented by GCC to make this work
+				// TODO: Use std::numeric_limits
 				const size_type __diffmax
 					= __gnu_cxx::__numeric_traits<difference_type>::__max / sizeof(T);
 				const size_type __allocmax = this->_M_allocator.max_size();
