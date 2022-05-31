@@ -41,6 +41,20 @@ void  __throw_out_of_range_fmt(const char* __fmt, ...)  {
 }
 
 
+// true/false_type definition, useful for overload resolution
+// alternative to enable_if
+// https://stackoverflow.com/questions/15598939/how-do-i-use-stdis-integral-to-select-an-implementation
+struct true_type { };
+struct false_type { };
+
+template<bool>
+  struct truth_type
+  { typedef false_type type; };
+
+template<>
+  struct truth_type<true>
+  { typedef true_type type; };
+
 template<class T, T v>
 struct integral_constant {
     const static T value = v;
