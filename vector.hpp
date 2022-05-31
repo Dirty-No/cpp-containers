@@ -130,7 +130,18 @@ namespace ft
 					_M_erase_at_end(std::fill_n(this->_M_start, __n, __val));
 			}
 
-			/// Safety check used only from at().
+			template<typename _InputIterator>
+			vector(_InputIterator __first, _InputIterator __last,
+				 const allocator_type& __a = allocator_type()) {
+				this->_M_allocator = __a;
+
+				// Check whether it's an integral type. 
+				// If so, it's not an iterator.
+				_M_range_constructor_dispatch(__first,
+					__last, ft::is_integral<_InputIterator>());
+			}
+
+			// Safety check used only from at().
 			void _M_range_check(size_type __n) const {
 				if (__n >= this->size())
 					__throw_out_of_range_fmt(__N("ft::vector::_M_range_check: __n "
@@ -389,45 +400,43 @@ namespace ft
 					// Set end_of_storage to end of allocated memory
 					this->_M_end_of_storage = this->_M_start + __n;
 				}
-			}
-
-			template<typename _Tp, typename _Alloc>
-			inline bool operator==(const vector<_Tp, _Alloc>& __x,
-				const vector<_Tp, _Alloc>& __y) {
-				return (__x.size() == __y.size()
-					&& std::equal(__x.begin(), __x.end(), __y.begin()));
-			}
-
-			template<typename _Tp, typename _Alloc>
-    		inline bool operator!=(const vector<_Tp, _Alloc>& __x,
-				const vector<_Tp, _Alloc>& __y) {
-				return !(__x == __y);
-			}
-
-			
-			// Based on operator<
-			template<typename _Tp, typename _Alloc>
-			inline bool operator>(const vector<_Tp, _Alloc>& __x,
-				const vector<_Tp, _Alloc>& __y) {
-					return __y < __x;
-			}
-
-			// Based on operator<
-			template<typename _Tp, typename _Alloc>
-			inline bool operator<=(const vector<_Tp, _Alloc>& __x,
-				const vector<_Tp, _Alloc>& __y) {
-					return !(__y < __x);
-			}
-
-			// Based on operator<
-			template<typename _Tp, typename _Alloc>
-			inline bool operator>=(const vector<_Tp, _Alloc>& __x,
-				const vector<_Tp, _Alloc>& __y) {
-					return !(__x < __y);
-			}
-
-			
+			}		
 	};
+
+	template<typename _Tp, typename _Alloc>
+	inline bool operator==(const vector<_Tp, _Alloc>& __x,
+		const vector<_Tp, _Alloc>& __y) {
+		return (__x.size() == __y.size()
+			&& std::equal(__x.begin(), __x.end(), __y.begin()));
+	}
+
+	template<typename _Tp, typename _Alloc>
+	inline bool operator!=(const vector<_Tp, _Alloc>& __x,
+		const vector<_Tp, _Alloc>& __y) {
+		return !(__x == __y);
+	}
+
+	
+	// Based on operator<
+	template<typename _Tp, typename _Alloc>
+	inline bool operator>(const vector<_Tp, _Alloc>& __x,
+		const vector<_Tp, _Alloc>& __y) {
+			return __y < __x;
+	}
+
+	// Based on operator<
+	template<typename _Tp, typename _Alloc>
+	inline bool operator<=(const vector<_Tp, _Alloc>& __x,
+		const vector<_Tp, _Alloc>& __y) {
+			return !(__y < __x);
+	}
+
+	// Based on operator<
+	template<typename _Tp, typename _Alloc>
+	inline bool operator>=(const vector<_Tp, _Alloc>& __x,
+		const vector<_Tp, _Alloc>& __y) {
+			return !(__x < __y);
+	}
 };
 
 #endif // ! VECTOR_HPP
