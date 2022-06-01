@@ -122,8 +122,12 @@ namespace ft
 					const size_type __add = __n - size();
 
 					// Fill uninitialized/unconstructed part
-					this->_M_finish = ft::__uninitialized_fill_n_a(this->_M_finish,
-					  __add, __val, this->_M_allocator);
+					this->_M_finish = ft::__uninitialized_fill_n_a(
+						this->_M_finish,
+						__add,
+						__val,
+						this->_M_allocator
+					);
 				}
 				else
 					// Fill up to N and erase extra data
@@ -137,17 +141,23 @@ namespace ft
 
 				// Check whether it's an integral type. 
 				// If so, it's not an iterator.
-				_M_range_constructor_dispatch(__first,
-					__last, ft::is_integral<_InputIterator>());
+				_M_range_constructor_dispatch(
+					__first,
+					__last,
+					ft::is_integral<_InputIterator>()
+				);
 			}
 
 			// Safety check used only from at().
 			void _M_range_check(size_type __n) const {
 				if (__n >= this->size())
-					__throw_out_of_range_fmt(__N("ft::vector::_M_range_check: __n "
-									"(which is %zu) >= this->size() "
-									"(which is %zu)"),
-								__n, this->size());
+					__throw_out_of_range_fmt(
+						"ft::vector::_M_range_check: __n "
+						"(which is %zu) >= this->size() "
+						"(which is %zu)",
+						__n,
+						this->size()
+				);
 			}
 
 		public:
@@ -263,13 +273,24 @@ namespace ft
 					const size_type __xlen = __x.size();
 					if (__xlen > capacity()) {
 						// Get a new buffer with new data
-						pointer __tmp =  _M_allocate_and_copy(__xlen, __x.begin(), __x.end());
+						pointer __tmp = _M_allocate_and_copy(
+							__xlen,
+							__x.begin(),
+							__x.end()
+						);
 						
 						// Destroy current buffer
-						__destroy(this->_M_start, this->_M_finish, this->_M_allocator);
+						__destroy(
+							this->_M_start,
+							this->_M_finish,
+							this->_M_allocator
+						);
 
 						// Deallocate current buffer
-						_M_deallocate(this->_M_start, this->_M_finish - this->_M_start);
+						_M_deallocate(
+							this->_M_start,
+							this->_M_finish - this->_M_start
+						);
 
 						// Set _M_start to new_buffer start
 						this->_M_start = __tmp;
@@ -279,15 +300,32 @@ namespace ft
 					}
 					else if (size() >= __xlen) {
 						// Copy new objects and destroy out of bond ones
-						__destroy(std::copy(__x.begin(), __x.end(), begin()), end(), this->_M_allocator);
+						__destroy(
+							std::copy(
+								__x.begin(),
+								__x.end(),
+								begin()
+							),
+							end(),
+							this->_M_allocator
+						);
 					}
 					else {
 						// here, this->size is lower but capacity is higher
 						// Copy to 'this' initialized part
-						std::copy(__x._M_start, __x._M_start + size(), this->_M_start);
+						std::copy(
+							__x._M_start,
+							__x._M_start + size(),
+							this->_M_start
+						);
 
 						// Copy to 'this' uninitialized part
-						ft::__uninitialized_copy_a(__x._M_start + size(), __x._M_finish, this->_M_finish, this->_M_allocator);
+						ft::__uninitialized_copy_a(
+							__x._M_start + size(),
+							__x._M_finish,
+							this->_M_finish,
+							this->_M_allocator
+						);
 					}
 					this->_M_finish = this->_M_start + __xlen;
 				}
@@ -380,16 +418,24 @@ namespace ft
 					const size_type __old_size = size();
 
 					// Allocate new buffer and copy existing data in it
-					pointer __tmp = _M_allocate_and_copy(__n, this->_M_start,
-						this->_M_finish);
+					pointer __tmp = _M_allocate_and_copy(
+						__n,
+						this->_M_start,
+						this->_M_finish
+					);
 
 					// Destroy old data
-					ft::__destroy(this->_M_start, this->_M_finish,
-						this->_M_allocator);
+					ft::__destroy(
+						this->_M_start,
+						this->_M_finish,
+						this->_M_allocator
+					);
 
 					// Deallocate entire old buffer
-					_M_deallocate(this->_M_start,
-						 this->_M_end_of_storage - this->_M_start);
+					_M_deallocate(
+						this->_M_start,
+						this->_M_end_of_storage - this->_M_start
+					);
 
 					// Set start to new allocated buffer
 					this->_M_start = __tmp;
