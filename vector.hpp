@@ -546,7 +546,16 @@ namespace ft
 					// Set end_of_storage to end of allocated memory
 					this->_M_end_of_storage = this->_M_start + __n;
 				}
-			}		
+			}
+
+			void push_back(const value_type& __x) {
+				if (this->_M_finish != this->_M_end_of_storage) {
+					this->_M_allocator.construct(this->_M_finish, __x);
+					++this->_M_finish;
+				}
+				else
+					_M_realloc_insert(end(), __x);
+			}
 	};
 
 	template<typename _Tp, typename _Alloc>
