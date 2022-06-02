@@ -268,6 +268,17 @@ struct iterator_traits<T*>
   typedef std::ptrdiff_t                  difference_type;
 };
 
+  /**         Taken from gcc's stl_iterator_base_types.h
+   *  This function is not a part of the C++ standard but is syntactic
+   *  sugar for internal library use only.
+  */
+  template<typename _Iter>
+  inline typename iterator_traits<_Iter>::iterator_category
+    __iterator_category(const _Iter&)
+  {
+    return typename iterator_traits<_Iter>::iterator_category();
+  }
+
 /* REVERSE ITERATOR */
 // https://en.cppreference.com/w/cpp/iterator/reverse_iterator
 template<class _Iterator>
