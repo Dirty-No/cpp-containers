@@ -580,19 +580,19 @@ namespace ft
 					OK to fit an ascii of MSGV Senator Armstrong in here
 					                                                                                                    
                                                         ...                                         
-                                            .:~7Y5PGGBB#####BBBBGP555YJ7~:                          
-                                       .^7YG#&@@@@@@@@@@@@@@@@@@@@@@@@@@@&BY^                       
-                                   .^7P#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@BY!                    
-                                 ~Y#@@@@@@@@@@@@@&#BGPPP5YJJ?7!!!77??JYPG#&@@@@@B!                  
-                               !G@@@@@@@@@@@@@G?^:.                      .:^7YG#@@P.                
-                             ^G@@@@@@@@@@@@@B7~^~:                             .~5@&^               
-                           .5@@@@@@@@@@@@@P??77!?G.                               :YB~              
-                          ^#@@@@@@@@@@@@#~      :J.                                 ^#~             
+Standing here                               .:~7Y5PGGBB#####BBBBGP555YJ7~:                          
+I realize                              .^7YG#&@@@@@@@@@@@@@@@@@@@@@@@@@@@&BY^                       
+You were just like me              .^7P#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@BY!                    
+Trying to make history           ~Y#@@@@@@@@@@@@@&#BGPPP5YJJ?7!!!77??JYPG#&@@@@@B!                  
+But who's to judge             !G@@@@@@@@@@@@@G?^:.                      .:^7YG#@@P.                
+The right from wrong         ^G@@@@@@@@@@@@@B7~^~:                             .~5@&^               
+When our guard is down     .5@@@@@@@@@@@@@P??77!?G.                               :YB~              
+I think we'll both agree  ^#@@@@@@@@@@@@#~      :J.                                 ^#~             
                          7&@@@@@@@@@@@@G.                                            ?B             
-                        ?@@@@@@@@@@@@@G.                                              B?            
-                       ?@@@@@@@@@@@@@B.                                               ^#^           
-                      7@@@@@@@@@@@@@@^                                                 PP           
-                     ^&@@@@@@@@@@@@@7            ....                                  7#           
+That violence           ?@@@@@@@@@@@@@G.                                              B?            
+Breeds violence        ?@@@@@@@@@@@@@B.                                               ^#^           
+But in the end        7@@@@@@@@@@@@@@^                                                 PP           
+It has to be this way &@@@@@@@@@@@@@7            ....                                  7#           
                      P@@@@@@@@@@@@@P          ^~~~^^^~~~~^:::::::..                     B!          
                     :&@@@@@@@@@@@@&:          :^~~~~^^^~!7!~^^^^^^~~~^^:..::::::::.     PY          
                     7@@@@@@@@@@@@@J          .^:..       .:^^^^^^~~!~!77!!7!!!!!!~~..   5G          
