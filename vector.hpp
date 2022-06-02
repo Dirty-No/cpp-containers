@@ -46,10 +46,15 @@ namespace ft
 			}
 
 			size_type _M_check_len(size_type __n, const char* __s) const {
+				// Ensure current length + __n < max_size
 				if (max_size() - size() < __n)
 					__throw_length_error(__s);
 
+				// Double length when __n < size()
+				// else, return __n
 				const size_type __len = size() + (std::max)(size(), __n);
+
+				// Ensure __len doesn't get bigger than max_size
 				return (__len < size() || __len > max_size()) ?
 					max_size() : __len;
 			}
@@ -134,20 +139,6 @@ namespace ft
 					_M_erase_at_end(std::fill_n(this->_M_start, __n, __val));
 			}
 
-			template<typename _InputIterator>
-			vector(_InputIterator __first, _InputIterator __last,
-				 const allocator_type& __a = allocator_type()) {
-				this->_M_allocator = __a;
-
-				// Check whether it's an integral type. 
-				// If so, it's not an iterator.
-				_M_range_constructor_dispatch(
-					__first,
-					__last,
-					ft::is_integral<_InputIterator>()
-				);
-			}
-
 			// Safety check used only from at().
 			void _M_range_check(size_type __n) const {
 				if (__n >= this->size())
@@ -157,13 +148,101 @@ namespace ft
 						"(which is %zu)",
 						__n,
 						this->size()
+					);
+			}
+
+			// Realloc and insert a single element
+			void _M_realloc_insert(iterator __position, const value_type& __x)
+			{
+				// Ensure len isnt bigger than max_size
+				const size_type __len = _M_check_len(
+					size_type(1),
+					"ft::vector::_M_realloc_insert"
 				);
+
+				// Save current start and finish position
+				pointer __old_start = this->_M_start;
+				pointer __old_finish = this->_M_finish;
+
+				// Get number of elements before inserted position
+				const size_type __elems_before = __position - begin();
+
+				// Allocate new buffer and init start and finish positions
+				pointer __new_start(this->_M_allocate(__len));
+				pointer __new_finish(__new_start);
+
+				try {
+					// Construct inserted element
+					this->_M_allocator.construct(
+						__new_start + __elems_before,
+						__x
+					);
+
+					// Re-copy everything before inserted element
+					// This is a new memory block so no elements are constructed
+					__new_finish = pointer();
+					__new_finish = ft::__uninitialized_copy_a(
+						__old_start,
+						__position,
+						__new_start,
+						this->_M_allocator
+					);
+
+					// Increment __new_finish past inserted element
+					++__new_finish;
+
+					// Re-copy everything after inserted element
+					// This is a new memory block so no elements are constructed
+					__new_finish = ft::__uninitialized_copy_a(
+						__position,
+						__old_finish,
+						__new_finish,
+						this->_M_allocator
+					);
+				}
+				catch(...) {
+					// This is executed when memory allocation
+					// 	or elements constructors throw an exception
+
+					if (!__new_finish) {
+						// __uninitialized_copy has failed but new elem inserted
+						// Destroy inserted element
+						this->_M_allocator.destroy(__new_start + __elems_before);
+					}
+					else {
+						// At least one copy has succeded
+						// We have to destroy all copied elements
+						ft::__destroy(
+							__new_start,
+							__new_finish,
+							this->_M_allocator
+						);
+					}
+					// Deallocate new_buffer
+					_M_deallocate(__new_start, __len);
+
+					// Throw exception again
+					throw;
+				}
+				// Destroy old elements
+				ft::__destroy(__old_start, __old_finish, this->_M_allocator);
+
+				// Deallocate old buffer
+				_M_deallocate(__old_start, __old_finish, this->_M_allocator);
+
+				// Set new position member values
+				this->_M_start = __new_start;
+				this->_M_finish = __new_finish;
+				this->_M_end_of_storage = __new_start + __len;
 			}
 
 		public:
 			~vector() {
 				// Simply deallocate the buffer
-				_M_deallocate(this->_M_start, this->_M_end_of_storage - this->_M_start);
+				_M_deallocate(
+					this->_M_start,
+					this->_M_end_of_storage - this->_M_start
+				);
 			}
 
 			// Init to default values
@@ -185,8 +264,12 @@ namespace ft
 				_M_create_storage(__n);
 
 				// Fill the value and set _M_finish.
-				this->_M_finish = ft::__uninitialized_fill_n_a(this->_M_start, __n,
-					__value, this->_M_allocator);
+				this->_M_finish = ft::__uninitialized_fill_n_a(
+					this->_M_start,
+					__n,
+					__value,
+					this->_M_allocator
+				);
 			}
 
 			// Copy constructor
@@ -198,9 +281,26 @@ namespace ft
 				this->_M_allocator = __x.get_allocator();
 
 				// Copy __x's data into is' uninitialized buffer
-				this->_M_finish = ft::__uninitialized_copy_a(__x.begin(), __x.end(),
-				this->_M_start,
-				this->_M_allocator);
+				this->_M_finish = ft::__uninitialized_copy_a(
+					__x.begin(),
+					__x.end(),
+					this->_M_start,
+					this->_M_allocator
+				);
+			}
+
+			template<typename _InputIterator>
+			vector(_InputIterator __first, _InputIterator __last,
+				 const allocator_type& __a = allocator_type()) {
+				this->_M_allocator = __a;
+
+				// Check whether it's an integral type. 
+				// If so, it's not an iterator.
+				_M_range_constructor_dispatch(
+					__first,
+					__last,
+					ft::is_integral<_InputIterator>()
+				);
 			}
 
 
