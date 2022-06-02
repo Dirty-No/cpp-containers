@@ -236,6 +236,95 @@ namespace ft
 				this->_M_end_of_storage = __new_start + __len;
 			}
 
+			// Input iterator range (read only, increment only)
+			// https://palm-screw-745.notion.site/InputIterators-b70026303c2e4c68b9177b529b1d0308
+			template<typename _InputIterator>
+			void _M_range_initialize(_InputIterator __first,
+			_InputIterator __last, std::input_iterator_tag) {
+				try {
+					// Push_back every elem naively
+					for (; __first != __last; ++__first) {
+						push_back(*__first);
+					}
+				}
+				catch(...) {
+					// Destroy all constructed elements
+					clear();
+
+					// throw exception again
+					throw;
+				}
+			}
+
+			// Forward iterator range (read/write, only increment)
+			// https://palm-screw-745.notion.site/ForwardIterator-c79f03dc37e446d8b9ee76bbe54e034d
+			template<typename _InputIterator>
+			void _M_range_initialize(_InputIterator __first,
+			_InputIterator __last, std::forward_iterator_tag) {
+				/*
+					Get number of elements in range.
+				 	std::distance will do:
+						- a simple __last - __ first on random access iterators (O(1))
+						- count with a for loop on input_iterators (O(n))
+					https://en.cppreference.com/w/cpp/iterator/distance
+				*/
+				const size_type __n = std::distance(__first, __last);
+				
+				// Allocate new buffer
+				this->_M_start = _M_allocate(_M_init_max_len_check(__n));
+
+				// Set end of storage pointer
+				this->_M_end_of_storage = this->_M_start + __n;
+
+				// Copy all objects to new buffer and set finish pointer
+				this->_M_finish = ft::__uninitialized_copy_a(
+					__first,
+					__last,
+					this->_M_start,
+					this->_M_allocator
+				);
+			}
+
+			template<typename _InputIterator>
+			void _M_initialize_dispatch(
+				_InputIterator __first,
+				_InputIterator __last,
+				ft::false_type)
+			{
+				_M_range_initialize(
+					__first,
+					__last,
+					ft::__iterator_category(__first)
+				);
+			}
+
+			// Resolves range construct ambiguity
+			// https://cplusplus.github.io/LWG/issue438
+			template<typename _Integer>
+			void _M_initialize_dispatch(
+				_Integer __n,
+				_Integer __value,
+				ft::true_type)
+			{
+				// Allocate new buffer
+				this->_M_start = _M_allocate(_M_init_max_len_check(
+					static_cast<size_type>(__n)));
+				
+				// Set end of storage position
+				this->_M_end_of_storage =
+					this->_M_start + static_cast<size_type>(__n);
+
+				// _M_fill_initialize(static_cast<size_type>(__n), __value);
+				
+				// Construct new elements with __value
+				this->_M_finish = ft::__uninitialized_fill_n_a(
+					this->_M_start,
+					static_cast<size_type>(__n),
+					__value,
+					this->_M_allocator
+				);
+			}
+
 		public:
 			~vector() {
 				// Simply deallocate the buffer
@@ -284,56 +373,6 @@ namespace ft
 				this->_M_finish = ft::__uninitialized_copy_a(
 					__x.begin(),
 					__x.end(),
-					this->_M_start,
-					this->_M_allocator
-				);
-			}
-
-
-			// Input iterator range (read only, increment only)
-			// https://palm-screw-745.notion.site/InputIterators-b70026303c2e4c68b9177b529b1d0308
-			template<typename _InputIterator>
-			void _M_range_initialize(_InputIterator __first,
-			_InputIterator __last, std::input_iterator_tag) {
-				try {
-					// Push_back every elem naively
-					for (; __first != __last; ++__first) {
-						push_back(*__first);
-					}
-				}
-				catch(...) {
-					// Destroy all constructed elements
-					clear();
-
-					// throw exception again
-					throw;
-				}
-			}
-
-			// Forward iterator range (read/write, only increment)
-			// https://palm-screw-745.notion.site/ForwardIterator-c79f03dc37e446d8b9ee76bbe54e034d
-			template<typename _InputIterator>
-			void _M_range_initialize(_InputIterator __first,
-			_InputIterator __last, std::forward_iterator_tag) {
-				/*
-					Get number of elements in range.
-				 	std::distance will do:
-						- a simple __last - __ first on random access iterators (O(1))
-						- count with a for loop on input_iterators (O(n))
-					https://en.cppreference.com/w/cpp/iterator/distance
-				*/
-				const size_type __n = std::distance(__first, __last);
-				
-				// Allocate new buffer
-				this->_M_start = _M_allocate(_M_init_max_len_check(__n));
-
-				// Set end of storage pointer
-				this->_M_end_of_storage = this->_M_start + __n;
-
-				// Copy all objects to new buffer and set finish pointer
-				this->_M_finish = ft::__uninitialized_copy_a(
-					__first,
-					__last,
 					this->_M_start,
 					this->_M_allocator
 				);
