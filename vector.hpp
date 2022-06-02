@@ -397,7 +397,7 @@ namespace ft
 						in any way.
 				*/
 
-				_M_range_initialize(
+				_M_initialize_dispatch(
 					__first,
 					__last,
 					ft::is_integral<_InputIterator>()
