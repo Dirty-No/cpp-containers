@@ -547,6 +547,101 @@ namespace ft
 				_M_fill_assign(__n, __val);
 			}
 
+			template<typename _InputIterator>
+			void assign(_InputIterator __first, _InputIterator __last)
+			{
+				/*
+					Check whether it's an integral type. 
+					If so, it's not an iterator and this must actually resolve
+					to void	assign(size_type __n, const value_type& __val);
+
+				
+					This is the same issue that happens with range constructor:
+						vector(
+							_InputIterator __first,
+							_InputIterator __last,
+				 			const allocator_type& __a
+						)
+
+						https://cplusplus.github.io/LWG/issue438
+
+					Still a dirty hack, the right function isn't _actually_
+						resolved, it's just dispatched to an identical one.
+
+					I wonder if this subject's authors actually expected that
+						students would encounter this type of pretty tricky
+						issues.
+						
+					I really feel like they didn't test their subject
+						themselves at all. still a good exercise tho, too bad
+						everyone's just not handling those cases at all.
+
+					That's a big ass comment lol, since we're here, I guess it's
+					OK to fit an ascii of MSGV Senator Armstrong in here
+					                                                                                                    
+                                                        ...                                         
+                                            .:~7Y5PGGBB#####BBBBGP555YJ7~:                          
+                                       .^7YG#&@@@@@@@@@@@@@@@@@@@@@@@@@@@&BY^                       
+                                   .^7P#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@BY!                    
+                                 ~Y#@@@@@@@@@@@@@&#BGPPP5YJJ?7!!!77??JYPG#&@@@@@B!                  
+                               !G@@@@@@@@@@@@@G?^:.                      .:^7YG#@@P.                
+                             ^G@@@@@@@@@@@@@B7~^~:                             .~5@&^               
+                           .5@@@@@@@@@@@@@P??77!?G.                               :YB~              
+                          ^#@@@@@@@@@@@@#~      :J.                                 ^#~             
+                         7&@@@@@@@@@@@@G.                                            ?B             
+                        ?@@@@@@@@@@@@@G.                                              B?            
+                       ?@@@@@@@@@@@@@B.                                               ^#^           
+                      7@@@@@@@@@@@@@@^                                                 PP           
+                     ^&@@@@@@@@@@@@@7            ....                                  7#           
+                     P@@@@@@@@@@@@@P          ^~~~^^^~~~~^:::::::..                     B!          
+                    :&@@@@@@@@@@@@&:          :^~~~~^^^~!7!~^^^^^^~~~^^:..::::::::.     PY          
+                    7@@@@@@@@@@@@@J          .^:..       .:^^^^^^~~!~!77!!7!!!!!!~~..   5G          
+                    Y@@@@@@@@@@@@&.                              .^??  ...  .::.::^^~.  7B          
+                    Y@@@@@@@@@@@@J          .~?JYYYYYJJ?77!!!~~^:. .?.     :^:          .#:         
+                    Y@@@@@@@@@@@@^      . .5&@@@@@@@@@@@@@@@@@@@@&BJ~      :. ~?5PPPPPPPP&J         
+                    Y@@@@@@@@@@@@^    :?? ?@@@&#BGGPP5PPGGG#&@@@@@#B:       .G@@@@@@@@@@@@@G^       
+                    J@@@@@@@@@@@&.   :YY!~Y&@&:.^~^^^^^^~~^:^^~!7?YG!       Y@@&@&#BGPP555YBP       
+                    !@@@@@@@@@@@&5PGB&&@@@@@@&.:!^^~~???J7~^.     .J#!^!????#B~!~7??Y55J???BP^:     
+                   .7&&@@@@@@@@@@@@@&@#BGPGGB@~~7!!~~?JJJ?!7JJ^   :Y&@@@@&&@@57J?7~:. .. .5P~??Y?   
+                 .J#B5?7B@@@@@@5?YY7!J.      ?G^..          .~!   7&J!^:...^GGYBGGP7J??~. B!  .YG   
+                 GJ:.:Y5:P@&BYJ!!!~~^         ~J?JJJJJ?!~^::.  ..7#~        Y&:     ..^^: #PG#@#:   
+                !#     JB:#~         :!:.           .:^!7???JJJ?J?Y.       .J7GY?7!^:.    G#G@P.    
+                ?P  ^  ~G P7        ~777!^                     :7?J^        Y~:~^~!7JJJJ?7#5Y?      
+                ?G ^7  !G ~~       .J!?7:                     ~7:           ^?!       ..::5G.       
+                ^&::?  .Y:         7Y?!.                  :~75!               :J^         !B        
+                 YP ?~          .~J5!                 .:!7~:77 .^!!~:         ..5?.       ~#.       
+                  GY J:        ^5Y!.                ^!!^:   :!!5GBG5PJ:     7#@BJ^!7^     !B        
+                  :#! J .!    :GJ                 ^7~.               ^~~~~~!YY?7.  .~?:   !B        
+                   ~#^^7 ?~   YY                  .                                  .?^  ?B        
+                    7#.?~ 7! ~Y!                :7 !:....:::^^~~~^^~~^^^^^^^:.         J. JP        
+                     YG !~!^:5Y:                :G JJ5J7?77!7?~~!!^^~~^^~^^~!!~~~^::.^^!! JP        
+                      GJ   .BG!                  P: ^!7?J7!~!?::J~.^Y^:7?.^Y^~7!^!JY?Y^.^ GJ        
+                      .&5JJ5P?.                  J?   .:^^~!!!!77!!77~~!!~!?~~7J??7~:    ^&:        
+                      55...^7!~                  .G:            .::::^^^:^^^^^^::.   ?:  55         
+                     YP   ^YY7?    :!^:           !P        .~!777!!!77!!^         .J^  ^#:         
+                    JG.  :JJ^J?~   .J~7            JJ       .~:.      ..^!?!       7^   GJ          
+                   7#.   ^?? ^??7   ~?7!            J.                             7.  JG           
+                  !#^    :JJ  .^~.   ^?77                                             !#:           
+                 ^#~      !G:         :7~!                             : .:.         7B:            
+                ^B?      .?5:                                         :P !?~  ~~    JG:             
+             .!YBB     .!YY7                                          :P.JJ^  ~7  ~PJ.              
+          .~J57^#~    !5Y!.                                           Y7?Y^  .!?Y5J:                
+        !YY7^  ~7     ~^                                        ^^^:.!&^7J!YPGYG#.                  
+     ^?Y?:                                                      ^!77!!7~~!7~^..#B!^^^~^^::::..      
+   !5Y~                      .^:                                       .~^    ?Y^5#G5?777???JJJ??7^ 
+  !Y^                        :~7!^                                   .~?!.    .   .^7JJJ!     .:^!~ 
+                               .~7~                                 .!!^               :^           
+                                 ~?:                            .~7!..:                             
+                                  ?~                          :!7~:                                 
+                                  :                          :~!.                                   
+				*/
+				_M_assign_dispatch(
+					__first,
+					__last,
+					ft::is_integral<_InputIterator>()
+				);
+			}
+
 			// simple swap, not sure if there's a better way
 			void swap(vector& __x) {
 				std::swap(this->_M_allocator, __x._M_allocator);
