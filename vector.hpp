@@ -327,7 +327,10 @@ namespace ft
 
 		public:
 			~vector() {
-				// Simply deallocate the buffer
+				// Destroy all elements
+				_M_erase_at_end(this->_M_start);
+
+				// Deallocate the buffer
 				_M_deallocate(
 					this->_M_start,
 					this->_M_end_of_storage - this->_M_start
