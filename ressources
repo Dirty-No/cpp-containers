@@ -28,3 +28,6 @@ https://stackoverflow.com/questions/15598939/how-do-i-use-stdis-integral-to-sele
 
 // enable_if usage
 https://www.enseignement.polytechnique.fr/informatique/INF478/docs/Cpp/en/cpp/types/enable_if.html
+
+// ambiguity in vector range constructor resolution
+https://cplusplus.github.io/LWG/issue438
