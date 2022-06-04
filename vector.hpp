@@ -1524,6 +1524,14 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
                 return __first;
             }
 
+            void resize(size_type __new_size, value_type __x = value_type()) {
+                if (__new_size > size()) {
+                    _M_fill_insert(end(), __new_size - size(), __x);
+                }
+                else if (__new_size < size())
+                    _M_erase_at_end(this->_M_start + __new_size);
+            }
+
     };
 
     template<typename _Tp, typename _Alloc>
