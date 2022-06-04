@@ -31,7 +31,8 @@ struct Buffer
 namespace ft_test
 {
 
-#ifdef STACK_HPP && VECTOR_HPP
+#ifdef STACK_HPP 
+#ifdef VECTOR_HPP
 template<typename T>
 class MutantStack : public NS::stack<T>
 {
@@ -103,15 +104,17 @@ static int main_subject(int argc, char** argv)
 	}
 	std::cout << std::endl;
 	return (0);
+	#endif
+	#endif
 }
-#endif
+
 
 int main_ft()
 {
 	(void)test_vector;
 	// (void)test_stack;
 	// (void)test_map;
-	// (void)test_lexicographic;
+	 (void)test_lexicographic;
 	// (void)is_integral_test;
 	// (void)pair_test;
 	// (void)make_pair_test;

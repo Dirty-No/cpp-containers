@@ -244,7 +244,7 @@ namespace ft
                 ft::__destroy(__old_start, __old_finish, this->_M_allocator);
 
                 // Deallocate old buffer
-                _M_deallocate(__old_start, __old_finish, this->_M_allocator);
+                _M_deallocate(__old_start, __old_finish - __old_start);
 
                 // Set new position member values
                 this->_M_start = __new_start;
@@ -507,7 +507,7 @@ namespace ft
                             );
 
                             // Set new finish position
-                            this->finish += __n;
+                            this->_M_finish += __n;
 
                             /* 
                                 Move everything that goes to initialized mem
@@ -747,7 +747,7 @@ namespace ft
                             );
 
                             // Set new finish position
-                            this->finish += __n;
+                            this->_M_finish += __n;
 
                             /* 
                                 Move everything that goes to initialized mem
@@ -851,9 +851,9 @@ namespace ft
             
                             // Perform copy (1)
                             ft::__uninitialized_fill_n_a(
+                                this->_M_finish,
                                 __n - __elems_after,
                                 __x,
-                                this->_M_finish,
                                 this->_M_allocator
                             );
 
@@ -1002,8 +1002,8 @@ namespace ft
                 // 	https://en.cppreference.com/w/cpp/algorithm/copy_backward
                 std::copy_backward(
                     __position,
-                    this->_M_impl._M_finish - 2,
-                    this->_M_impl._M_finish - 1
+                    this->_M_finish - 2,
+                    this->_M_finish - 1
                 );
 
                 // Actually copy the passed element into insertion position
@@ -1037,7 +1037,7 @@ namespace ft
                 );
             }
 
-            template <typename _InputIterator, typename _Integer>
+            template <typename _Integer>
             void _M_insert_dispatch(iterator __pos, _Integer __n, _Integer __val,
 			   ft::true_type) {
                 _M_fill_insert(__pos, __n, __val);
@@ -1078,7 +1078,7 @@ namespace ft
             // Copy constructor
             vector(const vector& __x) {
                 // Allocate buffer and init start/finish/end_of_storage pointers
-                _M_create_storage(__x.size);
+                _M_create_storage(__x.size());
 
                 // Copy allocator
                 this->_M_allocator = __x.get_allocator();
@@ -1525,7 +1525,7 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
                     if (__last != end()) {
                         std::copy(__last, end(), __first);
                     }
-                    _M_erase_at_end(__first + end() - __last);
+                    _M_erase_at_end(__first + (end() - __last));
                 }
                 return __first;
             }

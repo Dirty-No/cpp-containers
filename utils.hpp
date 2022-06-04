@@ -14,20 +14,20 @@ namespace ft {
 
 // https://code.woboq.org/gcc/libstdc++-v3/src/c++11/functexcept.cc.html
 // Exception helpers
-void  __throw_bad_exception() { throw (std::bad_exception()); }
-void  __throw_bad_alloc() { throw (std::bad_alloc()); }
-void  __throw_bad_cast() { throw (std::bad_cast()); }
-void  __throw_bad_typeid() { throw (std::bad_typeid()); }
-void  __throw_logic_error(const char* __s) { (void) __s; throw (std::logic_error(__s)); }
-void  __throw_domain_error(const char* __s) { (void) __s; throw (std::domain_error(__s)); }
-void  __throw_invalid_argument(const char* __s) { (void) __s; throw (std::invalid_argument(__s)); }
-void  __throw_length_error(const char* __s) { (void) __s; throw (std::length_error(__s)); }
-void  __throw_out_of_range(const char* __s) { (void) __s; throw (std::out_of_range(__s)); }
-void  __throw_runtime_error(const char* __s) { (void) __s; throw (std::runtime_error(__s)); }
-void  __throw_range_error(const char* __s) { (void) __s; throw (std::range_error(__s)); }
-void  __throw_overflow_error(const char* __s) { (void) __s; throw (std::overflow_error(__s)); }
-void  __throw_underflow_error(const char* __s) { (void) __s; throw (std::underflow_error(__s)); }
-void  __throw_out_of_range_fmt(const char* __fmt, ...)  {
+inline void  __throw_bad_exception() { throw (std::bad_exception()); }
+inline void  __throw_bad_alloc() { throw (std::bad_alloc()); }
+inline void  __throw_bad_cast() { throw (std::bad_cast()); }
+inline void  __throw_bad_typeid() { throw (std::bad_typeid()); }
+inline void  __throw_logic_error(const char* __s) { (void) __s; throw (std::logic_error(__s)); }
+inline void  __throw_domain_error(const char* __s) { (void) __s; throw (std::domain_error(__s)); }
+inline void  __throw_invalid_argument(const char* __s) { (void) __s; throw (std::invalid_argument(__s)); }
+inline void  __throw_length_error(const char* __s) { (void) __s; throw (std::length_error(__s)); }
+inline void  __throw_out_of_range(const char* __s) { (void) __s; throw (std::out_of_range(__s)); }
+inline void  __throw_runtime_error(const char* __s) { (void) __s; throw (std::runtime_error(__s)); }
+inline void  __throw_range_error(const char* __s) { (void) __s; throw (std::range_error(__s)); }
+inline void  __throw_overflow_error(const char* __s) { (void) __s; throw (std::overflow_error(__s)); }
+inline void  __throw_underflow_error(const char* __s) { (void) __s; throw (std::underflow_error(__s)); }
+inline void  __throw_out_of_range_fmt(const char* __fmt, ...)  {
   const size_t __len = __builtin_strlen(__fmt);
   // We expect at most 2 numbers, and 1 short string. The additional
   // 512 bytes should provide more than enough space for expansion.
@@ -221,12 +221,9 @@ _ForwardIterator __uninitialized_copy_a(_InputIterator __first, _InputIterator _
   }
 }
 
-//  unitialized fill with allocator and n bytes
-//  Can't use std::unitialized_fill because iterator doesnt meet
-//  the requirements to simply do __first + __n
 template<typename _ForwardIterator, typename _Size, typename _Tp, typename _Allocator>
-_ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,
-  const _Tp& __x, _Allocator& __alloc) {
+_ForwardIterator __uninitialized_fill_n_a_dispatcher(_ForwardIterator __first, _Size __n,
+  const _Tp& __x, _Allocator& __alloc, ft::false_type) {
   _ForwardIterator __cur = __first;
   try
   {
@@ -239,6 +236,38 @@ _ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,
     std::_Destroy(__first, __cur, __alloc);
     throw;
   }
+}
+
+template<typename _ForwardIterator, typename _Size, typename _Tp, typename _Allocator>
+_ForwardIterator __uninitialized_fill_n_a_dispatcher(_ForwardIterator __first, _Size __n,
+  const _Tp& __x, _Allocator& __alloc, ft::true_type) {
+  _ForwardIterator __cur = __first;
+  try
+  {
+    for (; __n > 0; --__n, (void) ++__cur)
+      __alloc.construct(ft::__addressof(*__cur), __x);
+    return __cur;
+  }
+  catch(...)
+  {
+    std::_Destroy(__first, __cur, __alloc);
+    throw;
+  }
+}
+
+//  unitialized fill with allocator and n bytes
+//  Can't use std::unitialized_fill because iterator doesnt meet
+//  the requirements to simply do __first + __n
+template<typename _ForwardIterator, typename _Size, typename _Tp, typename _Allocator>
+_ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,
+  const _Tp& __x, _Allocator& __alloc) {
+    return __uninitialized_fill_n_a_dispatcher(
+      __first,
+      __n,
+      __x,
+      __alloc,
+      ft::is_integral<_ForwardIterator>()
+    );
 }
 
 /* ITERATOR TRAITS */
@@ -314,6 +343,8 @@ class reverse_iterator {
 
     template <typename _Iter>
     reverse_iterator(const reverse_iterator<_Iter>& __x) : current(__x.base()) { }
+
+    explicit reverse_iterator(iterator_type __x) : current(__x) { }
 
     iterator_type base() const { return current; }
 

@@ -107,15 +107,15 @@ static int main_subject(int argc, char** argv)
 int main_stl()
 {
 	(void)test_vector;
-	(void)test_stack;
-	(void)test_map;
 	(void)test_lexicographic;
-	(void)is_integral_test;
-	(void)pair_test;
-	(void)make_pair_test;
-	(void)swap_test;
-	(void)map_order_test;
-	(void)map_iter_test;
+	// (void)test_stack;
+	// (void)test_map;
+	// (void)is_integral_test;
+	// (void)pair_test;
+	// (void)make_pair_test;
+	// (void)swap_test;
+	// (void)map_order_test;
+	// (void)map_iter_test;
 #ifndef __APPLE__
 	(void)main_subject;
 #if 0
@@ -142,20 +142,20 @@ int main_stl()
 	//std::cout << "Stack tests passed" << std::endl;
 	test_vector();
 	std::cout << "Vector tests passed" << std::endl;
-	return (0);
-	map_iter_test();
-	map_order_test();
-	test_map();
-	std::cout << "Map tests passed" << std::endl;
-	is_integral_test();
-	std::cout << "is_integral tests passed" << std::endl;
-	test_lexicographic();
-	std::cout << "Lexicographic tests passed" << std::endl;
-	pair_test();
-	std::cout << "Pair tests passed" << std::endl;
-	make_pair_test();
-	std::cout << "Make_pair tests passed" << std::endl;
-	swap_test();
-	std::cout << "Swap tests passed" << std::endl;
+	// return (0);
+	// map_iter_test();
+	// map_order_test();
+	// test_map();
+	// std::cout << "Map tests passed" << std::endl;
+	// is_integral_test();
+	// std::cout << "is_integral tests passed" << std::endl;
+	// test_lexicographic();
+	// std::cout << "Lexicographic tests passed" << std::endl;
+	// pair_test();
+	// std::cout << "Pair tests passed" << std::endl;
+	// make_pair_test();
+	// std::cout << "Make_pair tests passed" << std::endl;
+	// swap_test();
+	// std::cout << "Swap tests passed" << std::endl;
 	return (0);
 }
