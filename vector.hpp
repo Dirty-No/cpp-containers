@@ -27,7 +27,7 @@ namespace ft
             typedef	value_type* iterator;
             typedef	const value_type * const_iterator;
             typedef ft::reverse_iterator<iterator> reverse_iterator;
-            typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+            typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
         private:
             // https://en.wikipedia.org/wiki/Hungarian_notation#:~:text=s_wheels%C2%A0%3A%20static%20member%20of%20a%20class

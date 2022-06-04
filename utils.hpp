@@ -339,12 +339,12 @@ class reverse_iterator {
   public:
     reverse_iterator() : current() { }
 
+    explicit reverse_iterator(iterator_type __x) : current(__x) { }
+
     explicit reverse_iterator(const reverse_iterator & __x) : current(__x.current) {}
 
     template <typename _Iter>
     reverse_iterator(const reverse_iterator<_Iter>& __x) : current(__x.base()) { }
-
-    explicit reverse_iterator(iterator_type __x) : current(__x) { }
 
     iterator_type base() const { return current; }
 
