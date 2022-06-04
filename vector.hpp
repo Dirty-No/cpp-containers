@@ -1503,7 +1503,26 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
                     __last,
                     ft::is_integral<_InputIterator>()
                 );
-            } 
+            }
+
+            iterator erase(iterator __position) {
+                if (__position + 1 != end()) {
+                    std::copy(__position + 1, end(), __position);
+                }
+                --this->_M_finish;
+                this->_M_allocator.destroy(this->_M_finish);
+                return __position;
+            }
+
+            iterator erase(iterator __first, iterator __last) {
+                if (__first != __last) {
+                    if (__last != end()) {
+                        std::copy(__last, end(), __first);
+                    }
+                    _M_erase_at_end(__first + end() - __last);
+                }
+                return __first;
+            }
 
     };
 
