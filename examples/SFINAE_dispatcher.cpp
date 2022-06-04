@@ -2,7 +2,7 @@
 #include <iostream>
 
 // Clean alternative to enable_if
-
+// (this isnt actually SFINAE, its just overload resolution)
 
 /* FIRST METHOD (best) */
 // Avoids requirements issues
@@ -14,6 +14,9 @@ void _to_be_resolved_dispatcher(ft::true_type) {
 void _to_be_resolved_dispatcher(ft::false_type) {
 	std::cout << "false\n";
 }
+
+// STL sometimes needs another layer of dispatching and will use *_aux functions
+//	to do so 
 
 // We need to know our variable's type to use ft::is_integral on it.
 // Easier way to do this is to create a template dispactcher function this way:
