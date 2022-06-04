@@ -1506,6 +1506,11 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
                 );
             }
 
+            void insert(iterator __position,
+                size_type __n, const value_type& __x) {
+                _M_fill_insert(__position, __n, __x);
+            }
+
             iterator erase(iterator __position) {
                 if (__position + 1 != end()) {
                     std::copy(__position + 1, end(), __position);
