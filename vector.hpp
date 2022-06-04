@@ -703,15 +703,283 @@ namespace ft
                 }
             }
 
+            // Basically the same as _M_range_insert but with fill instead of copy
+            void _M_fill_insert(iterator __position,
+                size_type __n, const value_type& __x) {
+                if (__n != 0) {
+                    // Choose algorithm depending on current unused allocd mem
+                    if (
+                        size_type(this->_M_end_of_storage - this->_M_finish)
+                            >= __n
+                    )
+                    {
+                        // We have enough allocated memory past finish pos
+                        
+                        // Get number of elements after insert position
+                        const size_type __elems_after = end() - __position;
+
+                        // Save old finish position
+                        pointer __old_finish(this->_M_finish);
+
+                        if (__elems_after > __n) {
+                            
+                            // First, move everything that will go to uninit mem
+                            /*                                  
+                                                ---> (copy direction)                          
+                                           1    2   3   4      __n = 4                                               
+                                           /\  /\  /\  /\                                                  
+                                          /  \/  \/  \/  \     i: initialized                                           
+                                         /   /\  /\  /\   \    u: uninitialized                                           
+                                        /   /  \/  \/  \   \                                                                  
+                                       /   /   /\  /\   \   \                                                                
+                                      /   /   /  \/  \   \   \                                                                       
+                                     /   /   /   /\   \   \   \                                                                       
+                                    /   /   /   /  \   \   \   \                                                                     
+                              ... | i | i | i | i | u | u | u | u 
+
+                                    numbers represent copy order
+                            */
+                            ft::__uninitialized_copy_a(
+                                this->_M_finish - __n,
+                                this->_M_finish,
+                                this->_M_finish,
+                                this->_M_allocator
+                            );
+
+                            // Set new finish position
+                            this->finish += __n;
+
+                            /* 
+                                Move everything that goes to initialized mem
+                                
+                                We have __elems_after > __n, that means that
+                                    there is (__elems_after - __n) elements that
+                                    overlaps in the range.
+
+                                We do not have enough unused space to do
+                                    a simple std::copy
+                             
+                                We have two choices:
+
+                                simply copy the whole range backwards
+                                         ----> (copy direction)
+                                          (__n = 4)
+                          |        copied into       |    copied into |
+                          |          used init       |    initialized |
+                          |            memory        |    unused mem  |                        
+                          |11  10   9   8   7  6   5 |  4   3   2   1 | 
+                           /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\                                                           
+                          /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \                                    
+                         /   /\  /\  /\  /\  /\  /\  /\  /\  /\  /\   \                                      
+                        /   /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \   \                                     
+                       /   /   /\  /\  /\  /\  /\  /\  /\  /\  /\   \   \                                     
+                      /   /   /  \/  \/  \/  \/  \/  \/  \/  \/  \   \   \                                   
+                     /   /   /   /\  /\  /\  /\  /\  /\  /\  /\   \   \   \                                 
+                    /   /   /   /  \/  \/  \/  \/  \/  \/  \/  \   \   \   \                                                                                                    
+                  | m | m | m | m | m | m | m | m | m | m | m | i | i | i | i |
+                  |  future data  |       overlap             |     old data
+
+                                m: data to move
+                                i: initialized unused data (copied previously)
+
+                            We can also: (2)
+
+                                std::copy everything by groups of x (mod __n)
+                                
+                                         ----> (copy direction)
+                                          (__n = 4)
+                          |        copied into       |    copied into |
+                          |          used init       |    initialized |
+                          |            memory        |    unused mem  |                        
+                          |9  10   11 | 5   6  7   8 |  1   2   3   4 | 
+                           /\  /\  /\  /\  /\  /\  /\  /\  /\  /\  /\                                                           
+                          /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \/  \                                    
+                         /   /\  /\  /\  /\  /\  /\  /\  /\  /\  /\   \                                      
+                        /   /  \/  \/  \/  \/  \/  \/  \/  \/  \/  \   \                                     
+                       /   /   /\  /\  /\  /\  /\  /\  /\  /\  /\   \   \                                     
+                      /   /   /  \/  \/  \/  \/  \/  \/  \/  \/  \   \   \                                   
+                     /   /   /   /\  /\  /\  /\  /\  /\  /\  /\   \   \   \                                 
+                    /   /   /   /  \/  \/  \/  \/  \/  \/  \/  \   \   \   \                                                                                                    
+                  | m | m | m | m | m | m | m | m | m | m | m | i | i | i | i |
+                  |  future data  |       overlap             |     old data
+
+                                m: data to move
+                                i: initialized unused data (copied previously)
+
+                            Both methods are equivalent in complexity
+                            (1) is definitely simpler, being a single call to
+                                std::copy_backwards, that's what gcc's STL chose 
+
+                            Note: just realized that (2) is actually just
+                                a fancy copy_backward, 
+                                (1) is basically (2) with x = 1
+                            
+                                Let's implement (1) then.
+                            */
+
+                            std::copy_backward(
+                                __position,
+                                __old_finish - __n,
+                                __old_finish
+                            );
+
+                            // Actually insert the new data
+                            std::fill(__position, __position + __n, __x);
+                        } else {
+                            /* ( _elems_after <= __n )
+                                    
+                                __n = 5, p: __position; __elem_after = 2
+
+                                          [ copy (2) ]
+                                             /\  /\                                       
+                                            /  \/  \
+                                           /   /\   \
+                                          /   /  \   \                          
+                                         /   /    \   \                          
+                                        /   /      \   \                          
+                                       /   /        \   \                          
+                                      /   /          \   \                      
+                                     /   /            \   \                    
+                                    /   /              \   \                 
+                                p | i | i | u | u | u | u | u | u 
+                                  | 1   2 | 3   4   5 |
+                                  |cpy (3)|  copy (1) | 
+
+                                  numbers represents elem order in 
+                                    (__fist,__last) range
+                            */
+            
+                            // Perform copy (1)
+                            ft::__uninitialized_fill_n_a(
+                                __n - __elems_after,
+                                __x,
+                                this->_M_finish,
+                                this->_M_allocator
+                            );
+
+                            // Set finish position to end of (1)
+		                    this->_M_finish += __n - __elems_after;
+
+                            // Perform copy (2)
+                            ft::__uninitialized_copy_a(
+                                __position,
+                                __old_finish,
+                                this->_M_finish,
+                                this->_M_allocator
+                            );
+
+                            // Set finish position to end of (2)
+                            this->_M_finish += __elems_after;
+
+                            // Perform copy (3)
+                            std::fill(__position, __old_finish, __x);
+                        }
+                    } else {
+                        // We do not have enough capacity, we have to realloc
+                        
+                        // Ensure new len is allocable
+                        const size_type __len = _M_check_len(
+                            __n,
+                            "ft::vector::_M_fill_insert"
+                        );
+
+                        const size_type __elems_before = __position - begin();
+
+                        // Allocate new buffer and set position pointers
+                        pointer __new_start(this->_M_allocate(__len));
+                        pointer __new_finish(__new_start);
+                        
+                        try 
+                        {
+                           ft::__uninitialized_fill_n_a(
+                               __new_start + __elems_before,
+                               __n,
+                               __x,
+                               this->_M_allocator
+                           );
+
+                            __new_finish = pointer();
+
+                            // Copy the entire passed range
+                            __new_finish = ft::__uninitialized_copy_a(
+                                this->_M_start,
+                                __position,
+                                __new_start,
+                                this->_M_allocator
+                            );
+
+                            __new_finish += __n;
+
+                            // Copy back everything after __position
+                            __new_finish = ft::__uninitialized_copy_a(
+                                __position,
+                                this->_M_finish,
+                                __new_finish,
+                                this->_M_allocator
+                            );
+
+
+                        }
+                        catch (...) {
+                            if (!__new_finish)
+                                ft::__destroy(
+                                    __new_start + __elems_before,
+                                    __new_start + __elems_before + __n,
+                                    this->_M_allocator
+                                );
+                            else
+                                // Destroy all constructed object
+                                ft::__destroy(
+                                    __new_start,
+                                    __new_finish,
+                                    this->_M_allocator
+                                );
+
+                            // Deallocate new buffer
+                            _M_deallocate(__new_start, __len);
+
+                            // Throw exception again
+                            throw;
+                        }
+                        
+                        // Destroy and deallocate old data
+                        _M_clear_and_deallocate();
+
+                        // Set position values to new buffer
+                        this->_M_start = __new_start;
+                        this->_M_finish = __new_finish;
+                        this->_M_end_of_storage = __new_start + __len;
+                    }
+                }
+            }
+
             // Needs _M_range_insert
 
-            // template<typename _InputIterator>
-            // void _M_assign_aux(_InputIterator __first, _InputIterator __last,
-            // 	std::forward_iterator_tag)
-            // {
+            template<typename _InputIterator>
+            void _M_assign_aux(_InputIterator __first, _InputIterator __last,
+            	std::input_iterator_tag) {
+                
+                // Init current position for iterating
+                pointer __cur(this->_M_start);
 
-
-            // }
+                for (;
+                    __first != __last && __cur != this->_M_finish;
+                    ++__cur,
+                    (void)++__first;
+                ) {
+                    if (__first == __last) {
+                        _M_erase_at_end(__cur);
+                    }
+                    else {
+                        _M_range_insert(
+                            end(),
+                            __first,
+                            __last,
+                            ft::__iterator_category(__first);
+                        );
+                    }
+                }
+            }
 
             // To inline
             void _M_no_realloc_insert(iterator __position, const T& __x) {
@@ -742,6 +1010,39 @@ namespace ft
                 *__position = __x_copy;
             }
 
+            template<typename _Integer>
+            void _M_assign_dispatch(_Integer __n, _Integer __val, __true_type)
+            {
+                _M_fill_assign(__n, __val); 
+            }
+
+            template<typename _InputIterator>
+            void _M_assign_dispatch(
+                _InputIterator __first, _InputIterator __last, __false_type)
+            {
+                _M_assign_aux(
+                    __first,
+                    __last,
+                    ft::__iterator_category(__first)
+                );
+            }
+
+            template <typename _InputIterator>
+            void _M_insert_dispatch(iterator __pos, _InputIterator __first, 
+                _InputIterator __last, ft::false_type) {
+                _M_range_insert(__pos,
+                    __first,
+                    __last,
+                    ft::__iterator_category(__first)
+                );
+            }
+
+            template <typename _InputIterator>
+            void _M_insert_dispatch(iterator __pos, _Integer __n, _Integer __val,
+			   ft::true_type) {
+                _M_fill_insert(__pos, __n, __val);
+            }
+
         public:
             ~vector() {
                 // Destroy all elements and deallocate the buffer
@@ -754,7 +1055,6 @@ namespace ft
             explicit vector(allocator_type __a) {
                 this->_M_allocator = __a;
             }
-
 
             // Fill constructor
             explicit vector(size_type __n, const value_type& __value = value_type(),
@@ -1157,6 +1457,7 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
                     this->_M_end_of_storage = this->_M_start + __n;
                 }
             }
+
             void push_back(const value_type& __x) {
                 if (this->_M_finish != this->_M_end_of_storage) {
                     this->_M_allocator.construct(this->_M_finish, __x);
@@ -1193,6 +1494,17 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
                 // Return new position
                 return iterator(this->_M_start + __n);
             }
+        
+            template <typename _InputIterator>
+            void insert(iterator __position,
+                _InputIterator __first, _InputIterator __last) {
+                _M_insert_dispatch(
+                    __first,
+                    __last,
+                    ft::is_integral<_InputIterator>()
+                );
+            } 
+
     };
 
     template<typename _Tp, typename _Alloc>
