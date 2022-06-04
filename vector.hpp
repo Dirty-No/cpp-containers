@@ -965,7 +965,7 @@ namespace ft
                 for (;
                     __first != __last && __cur != this->_M_finish;
                     ++__cur,
-                    (void)++__first;
+                    (void)++__first
                 ) {
                     if (__first == __last) {
                         _M_erase_at_end(__cur);
@@ -975,7 +975,7 @@ namespace ft
                             end(),
                             __first,
                             __last,
-                            ft::__iterator_category(__first);
+                            ft::__iterator_category(__first)
                         );
                     }
                 }
@@ -989,7 +989,7 @@ namespace ft
                 //	would be copied anyway
                 this->_M_allocator.construct(
                     this->_M_finish,
-                    this->_M_finish[-1],
+                    this->_M_finish[-1]
                 );
 
                 // Offset finish position by one
@@ -1001,7 +1001,7 @@ namespace ft
                 // See Notes: 
                 // 	https://en.cppreference.com/w/cpp/algorithm/copy_backward
                 std::copy_backward(
-                    __position
+                    __position,
                     this->_M_impl._M_finish - 2,
                     this->_M_impl._M_finish - 1
                 );
@@ -1011,14 +1011,14 @@ namespace ft
             }
 
             template<typename _Integer>
-            void _M_assign_dispatch(_Integer __n, _Integer __val, __true_type)
+            void _M_assign_dispatch(_Integer __n, _Integer __val, ft::true_type)
             {
                 _M_fill_assign(__n, __val); 
             }
 
             template<typename _InputIterator>
             void _M_assign_dispatch(
-                _InputIterator __first, _InputIterator __last, __false_type)
+                _InputIterator __first, _InputIterator __last, ft::false_type)
             {
                 _M_assign_aux(
                     __first,
@@ -1037,7 +1037,7 @@ namespace ft
                 );
             }
 
-            template <typename _InputIterator>
+            template <typename _InputIterator, typename _Integer>
             void _M_insert_dispatch(iterator __pos, _Integer __n, _Integer __val,
 			   ft::true_type) {
                 _M_fill_insert(__pos, __n, __val);
@@ -1499,6 +1499,7 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
             void insert(iterator __position,
                 _InputIterator __first, _InputIterator __last) {
                 _M_insert_dispatch(
+                    __position,
                     __first,
                     __last,
                     ft::is_integral<_InputIterator>()
@@ -1530,6 +1531,11 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
                 }
                 else if (__new_size < size())
                     _M_erase_at_end(this->_M_start + __new_size);
+            }
+
+            void pop_back() {
+                --this->_M_finish;
+                this->_M_allocator.destroy(this->_M_finish);
             }
 
     };
@@ -1568,6 +1574,6 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
         const vector<_Tp, _Alloc>& __y) {
             return !(__x < __y);
     }
-};
+}
 
 #endif // ! VECTOR_HPP

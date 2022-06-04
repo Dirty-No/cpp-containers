@@ -125,8 +125,8 @@ template<typename>
   _FT_DEFINE_SPEC(0, __is_integral_helper, unsigned int, true)
   _FT_DEFINE_SPEC(0, __is_integral_helper, long, true)
   _FT_DEFINE_SPEC(0, __is_integral_helper, unsigned long, true)
-  _FT_DEFINE_SPEC(0, __is_integral_helper, long long, true)
-  _FT_DEFINE_SPEC(0, __is_integral_helper, unsigned long long, true)
+  // _FT_DEFINE_SPEC(0, __is_integral_helper, long long, true) // c++11
+  // _FT_DEFINE_SPEC(0, __is_integral_helper, unsigned long long, true) // c++11
 
 /// remove_const
 template<typename _Tp>
