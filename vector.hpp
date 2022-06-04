@@ -1544,7 +1544,7 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
     inline bool operator==(const vector<_Tp, _Alloc>& __x,
         const vector<_Tp, _Alloc>& __y) {
         return (__x.size() == __y.size()
-            && std::equal(__x.begin(), __x.end(), __y.begin()));
+            && ft::equal(__x.begin(), __x.end(), __y.begin()));
     }
 
     template<typename _Tp, typename _Alloc>
@@ -1553,7 +1553,13 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
         return !(__x == __y);
     }
 
-    
+    template<typename _Tp, typename _Alloc>
+    inline bool
+    operator<(const vector<_Tp, _Alloc>& __x, const vector<_Tp, _Alloc>& __y) {
+        return ft::lexicographical_compare(__x.begin(), __x.end(),
+					  __y.begin(), __y.end());
+    }
+
     // Based on operator<
     template<typename _Tp, typename _Alloc>
     inline bool operator>(const vector<_Tp, _Alloc>& __x,
