@@ -388,7 +388,7 @@ class reverse_iterator {
     reverse_iterator operator--(int) {
       reverse_iterator __tmp = *this;
       ++current;
-      return *this;
+      return __tmp;
     }
 
   // The underlying iterator must be a Random Access Iterator.
@@ -415,7 +415,7 @@ class reverse_iterator {
 
   // The underlying iterator must be a Random Access Iterator.
   reference operator[](difference_type __n) const {
-    return (*this)[__n];
+    return *(*this + __n);
   }
 
   // template<typename _Iterator>
