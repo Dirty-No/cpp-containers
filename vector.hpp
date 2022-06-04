@@ -992,6 +992,8 @@ namespace ft
                     this->_M_finish[-1]
                 );
 
+                ++this->_M_finish;
+
                 // Offset finish position by one
                 T __x_copy = __x;
 
@@ -1000,6 +1002,7 @@ namespace ft
                 // have to use copy_backward
                 // See Notes: 
                 // 	https://en.cppreference.com/w/cpp/algorithm/copy_backward
+               //  std::cout << "inhere\n";
                 std::copy_backward(
                     __position,
                     this->_M_finish - 2,
