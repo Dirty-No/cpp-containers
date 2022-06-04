@@ -4,6 +4,8 @@
 # include <algorithm> // std::copy, std::max, std::min
 # include "utils.hpp"
 
+//# define FT_DEBUG_VERBOSE
+
 namespace ft
 {
     // https://en.cppreference.com/w/cpp/container/vector
@@ -346,7 +348,11 @@ namespace ft
             template<typename _ForwardIterator>
             void _M_assign_aux(_ForwardIterator __first,
                 _ForwardIterator __last, std::forward_iterator_tag) {
-                
+                #ifdef FT_DEBUG_VERBOSE
+                    std::cout<<
+                    "void _M_assign_aux(_ForwardIterator __first,"
+                    "_ForwardIterator __last, std::forward_iterator_tag) \n";
+                #endif 
                 /*
                     Get number of elements in range.
                      std::distance will do:
@@ -398,7 +404,7 @@ namespace ft
                     );
 
                     // Copy everything that has to go in uninitialized memory
-                    ft::__uninitialized_copy_a(
+                    this->_M_finish = ft::__uninitialized_copy_a(
                         __last_to_copy_in_init_mem,
                         __last,
                         this->_M_finish,
@@ -959,6 +965,13 @@ namespace ft
             void _M_assign_aux(_InputIterator __first, _InputIterator __last,
             	std::input_iterator_tag) {
                 
+                #ifdef FT_DEBUG_VERBOSE
+                    std::cout<<
+                    "void _M_assign_aux"
+                    "(_InputIterator __first, _InputIterator __last,"
+                    "std::input_iterator_tag) {\n";
+                #endif 
+
                 // Init current position for iterating
                 pointer __cur(this->_M_start);
 
@@ -1016,6 +1029,11 @@ namespace ft
             template<typename _Integer>
             void _M_assign_dispatch(_Integer __n, _Integer __val, ft::true_type)
             {
+                #ifdef FT_DEBUG_VERBOSE
+                    std::cout << "void _M_assign_dispatch"
+                    "(_Integer __n, _Integer __val, ft::true_type)\n";
+                #endif
+
                 _M_fill_assign(__n, __val); 
             }
 
@@ -1023,6 +1041,12 @@ namespace ft
             void _M_assign_dispatch(
                 _InputIterator __first, _InputIterator __last, ft::false_type)
             {
+                #ifdef FT_DEBUG_VERBOSE
+                std::cout << 
+                    "void _M_assign_dispatch(_InputIterator __first, _InputIterator"
+                    " __last, ft::false_type)\n";
+                #endif
+
                 _M_assign_aux(
                     __first,
                     __last,
@@ -1258,12 +1282,14 @@ namespace ft
             // Fills __n bytes with __val starting from _M_start
             // https://en.cppreference.com/w/cpp/container/vector/assign
             void	assign(size_type __n, const value_type& __val){
+                // std::cout << "void	assign(size_type __n, const value_type& __val)\n";
                 _M_fill_assign(__n, __val);
             }
 
             template<typename _InputIterator>
             void assign(_InputIterator __first, _InputIterator __last)
             {
+                // std::cout << "void assign(_InputIterator __first, _InputIterator __last)\n";
                 /* big comment
                     Check whether it's an integral type. 
                     If so, it's not an iterator and this must actually resolve
