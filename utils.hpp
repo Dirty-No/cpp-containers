@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <stddef.h>
 
+#ifndef FT_DEBUG_VERBOSE
+// #define FT_DEBUG_VERBOSE
+#endif
+
 namespace ft {
 
 // https://code.woboq.org/gcc/libstdc++-v3/src/c++11/functexcept.cc.html
@@ -221,39 +225,7 @@ _ForwardIterator __uninitialized_copy_a(_InputIterator __first, _InputIterator _
   }
 }
 
-template<typename _ForwardIterator, typename _Size, typename _Tp, typename _Allocator>
-_ForwardIterator __uninitialized_fill_n_a_dispatcher(_ForwardIterator __first, _Size __n,
-  const _Tp& __x, _Allocator& __alloc, ft::false_type) {
-  _ForwardIterator __cur = __first;
-  try
-  {
-    for (; __n > 0; --__n, (void) ++__cur)
-      __alloc.construct(ft::__addressof(*__cur), __x);
-    return __cur;
-  }
-  catch(...)
-  {
-    std::_Destroy(__first, __cur, __alloc);
-    throw;
-  }
-}
 
-template<typename _ForwardIterator, typename _Size, typename _Tp, typename _Allocator>
-_ForwardIterator __uninitialized_fill_n_a_dispatcher(_ForwardIterator __first, _Size __n,
-  const _Tp& __x, _Allocator& __alloc, ft::true_type) {
-  _ForwardIterator __cur = __first;
-  try
-  {
-    for (; __n > 0; --__n, (void) ++__cur)
-      __alloc.construct(ft::__addressof(*__cur), __x);
-    return __cur;
-  }
-  catch(...)
-  {
-    std::_Destroy(__first, __cur, __alloc);
-    throw;
-  }
-}
 
 //  unitialized fill with allocator and n bytes
 //  Can't use std::unitialized_fill because iterator doesnt meet
@@ -261,13 +233,24 @@ _ForwardIterator __uninitialized_fill_n_a_dispatcher(_ForwardIterator __first, _
 template<typename _ForwardIterator, typename _Size, typename _Tp, typename _Allocator>
 _ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,
   const _Tp& __x, _Allocator& __alloc) {
-    return __uninitialized_fill_n_a_dispatcher(
-      __first,
-      __n,
-      __x,
-      __alloc,
-      ft::is_integral<_ForwardIterator>()
-    );
+    #ifdef FT_DEBUG_VERBOSE
+      std::cout << "_ForwardIterator __uninitialized_fill_n_a(_ForwardIterator __first, _Size __n,"
+      "const _Tp& __x, _Allocator& __alloc)\n";
+    #endif
+    _ForwardIterator __cur = __first;
+    try
+    {
+      for (; __n > 0; --__n, (void) ++__cur)
+      {
+	    	std::_Construct(std::__addressof(*__cur), __x);
+      }
+      return __cur;
+    }
+    catch(...)
+    {
+      std::_Destroy(__first, __cur, __alloc);
+      throw;
+    }
 }
 
 /* ITERATOR TRAITS */

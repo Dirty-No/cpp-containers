@@ -10,15 +10,15 @@ PURPLE="\e[95m"
 CYAN="\e[96m"
 DGREY="\e[1;90m"
 
-include_path="../"
+include_path="../../"
 srcs="srcs"
 
 CC="clang++"
 CFLAGS="-Wall -Wextra -Werror -std=c++98"
 # CFLAGS+=" -fsanitize=address -g3"
 
-ft_compile_output="/dev/null"
-std_compile_output="/dev/null"
+ft_compile_output="ft.compile"
+std_compile_output="std.compile"
 
 function pheader () {
 printf "${EOC}${BOLD}${DBLUE}\
@@ -40,6 +40,7 @@ compile () {
 	# 1=file 2=define used {ft/std} 3=output_file 4?=compile_log
 	macro_name=$(echo "USING_${2}" | awk '{ print toupper($0) }')
 	compile_cmd="$CC $CFLAGS -o ${3} -I./$include_path -D ${macro_name} ${1}"
+#	echo "$compile_cmd"
 	if [ -n "$4" ]; then
 		compile_cmd+=" &>${4}"
 	fi

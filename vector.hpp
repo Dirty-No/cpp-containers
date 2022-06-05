@@ -4,7 +4,9 @@
 # include <algorithm> // std::copy, std::max, std::min
 # include "utils.hpp"
 
-//# define FT_DEBUG_VERBOSE
+#ifndef FT_DEBUG_VERBOSE
+// #define FT_DEBUG_VERBOSE
+#endif
 
 namespace ft
 {
@@ -316,7 +318,19 @@ namespace ft
                 );
             }
 
-            // Resolves range construct ambiguity
+
+
+            void
+            _M_fill_initialize(size_type __n, const value_type& __value)
+            {
+                std::cout << "FUCK THIS\n";
+                this->_M_finish =
+                    std::__uninitialized_fill_n_a(this->_M_start, __n, __value,
+                                this->_M_allocator);
+            }
+
+
+                  // Resolves range construct ambiguity
             // https://cplusplus.github.io/LWG/issue438
             template<typename _Integer>
             void _M_initialize_dispatch(
@@ -324,6 +338,12 @@ namespace ft
                 _Integer __value,
                 ft::true_type)
             {
+                #ifdef FT_DEBUG_VERBOSE
+                    std::cout << "called             void _M_initialize_dispatch("
+                    "_Integer __n,"
+                    "_Integer __value,"
+                    "ft::true_type)\n";
+                #endif
                 // Allocate new buffer
                 this->_M_start = _M_allocate(_M_init_max_len_check(
                     static_cast<size_type>(__n)));
@@ -334,13 +354,22 @@ namespace ft
 
                 // _M_fill_initialize(static_cast<size_type>(__n), __value);
                 
+
+
                 // Construct new elements with __value
-                this->_M_finish = ft::__uninitialized_fill_n_a(
+
+                // BUG BUG BUG
+                // This doent call the copy operator
+                this->_M_finish = std::__uninitialized_fill_n_a(
                     this->_M_start,
                     static_cast<size_type>(__n),
                     __value,
                     this->_M_allocator
                 );
+
+                // BUT THIS DOES ??? ITS THE SAME CODE ?????
+	            // _M_fill_initialize(static_cast<size_type>(__n), __value);
+
             }
 
             // Range assign implementation for forward_iterators (read/write, increment)
@@ -1087,6 +1116,8 @@ namespace ft
             explicit vector(size_type __n, const value_type& __value = value_type(),
                 const allocator_type& __a = allocator_type())
             : _M_allocator(__a) {
+                std::cout << "called explicit vector(size_type __n, const value_type& __value = value_type(),"
+                "const allocator_type& __a = allocator_type())\n";
                 // Ensure __n is lower than max_size()
                 _M_init_max_len_check(__n);
 
@@ -1124,6 +1155,10 @@ namespace ft
                  const allocator_type& __a = allocator_type()) {
                 this->_M_allocator = __a;
 
+                # ifdef FT_DEBUG_VERBOSE
+                    std::cout << "vector(_InputIterator __first, _InputIterator __last,"
+                    "const allocator_type& __a = allocator_type())\n";
+                #endif
                 /*
                     Check whether it's an integral type. 
                     If so, it's not an iterator and this must actually resolve
@@ -1571,8 +1606,14 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
                 --this->_M_finish;
                 this->_M_allocator.destroy(this->_M_finish);
             }
-
     };
+
+    template<typename _Tp, typename _Alloc>
+    void swap(vector<_Tp, _Alloc>& __x,
+        vector<_Tp, _Alloc>& __y) {
+        // std::cout << "THIS JAS BEEN CALLED\n";
+        __x.swap(__y);
+    }
 
     template<typename _Tp, typename _Alloc>
     inline bool operator==(const vector<_Tp, _Alloc>& __x,
