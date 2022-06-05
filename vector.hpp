@@ -358,18 +358,25 @@ namespace ft
 
                 // Construct new elements with __value
 
+
                 // BUG BUG BUG
                 // This doent call the copy operator
+                // this->_M_finish = std::__uninitialized_fill_n_a(
+                //     this->_M_start,
+                //     static_cast<size_type>(__n),
+                //     __value,
+                //     this->_M_allocator
+                // );
+                
+                // BUT THIS DOES ??? ITS THE SAME CODE ?????
+                const value_type& lololol = __value;
+
                 this->_M_finish = std::__uninitialized_fill_n_a(
                     this->_M_start,
                     static_cast<size_type>(__n),
-                    __value,
+                    lololol,
                     this->_M_allocator
                 );
-
-                // BUT THIS DOES ??? ITS THE SAME CODE ?????
-	            // _M_fill_initialize(static_cast<size_type>(__n), __value);
-
             }
 
             // Range assign implementation for forward_iterators (read/write, increment)
