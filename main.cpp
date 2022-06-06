@@ -1,12 +1,16 @@
-#include "vector.hpp"
-#include <vector>
-#include <iostream>
-int main(void)
-{
-	ft::vector<int> v;
-	ft::vector<int> v2;
-	std::vector<int> vv;
+#include "main.hpp"
+#include <string.h>
 
-	std::cout << v.max_size() << " " << vv.max_size() << std::endl;
-	v = v2;
+int main(int argc, char *argv[])
+{
+    char *ext = strrchr(argv[0], '.');
+    std::string ext_str = ext ? (ext + 1): "";
+
+    (void)argc;
+    std::cout << ext_str << std::endl;
+    if (ext_str == "stl")
+        main_stl();
+    else if (ext_str == "ft")
+        main_ft();
+    return (0);
 }
