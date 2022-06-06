@@ -4,9 +4,30 @@ https://en.cppreference.com/w/cpp/memory/allocator
 
 https://krshrimali.github.io/posts/2020/04/understanding-how-vectors-work-in-c-part-1-how-does-push_back-work/
 
-
+// STL tutorial series
 https://www.youtube.com/watch?v=i9tdEjyxC58
 https://www.youtube.com/watch?v=5r-ysMLn9DY
 https://www.youtube.com/watch?v=5r-ysMLn9DY
 
 https://pages.cs.wisc.edu/~driscoll/typename.html
+
+https://www.internalpointers.com/post/quick-primer-type-traits-modern-cpp
+
+https://stackoverflow.com/questions/6742008/what-are-the-typical-use-cases-of-an-iterator-trait
+
+https://stackoverflow.com/questions/9755316/does-it-make-sense-to-use-stduninitialized-fill-with-any-allocator
+https://www.geeksforgeeks.org/placement-new-operator-cpp/
+
+https://stackoverflow.com/questions/3407633/explain-c-sfinae-to-a-non-c-programmer#:~:text=SFINAE%20is%20a%20principle%20a,which%20one%20will%20be%20used.
+
+https://stackoverflow.com/questions/14676574/differences-between-stdis-integer-and-stdis-integral
+
+// enable_if vs dispatcher
+https://stackoverflow.com/questions/15598939/how-do-i-use-stdis-integral-to-select-an-implementation
+
+
+// enable_if usage
+https://www.enseignement.polytechnique.fr/informatique/INF478/docs/Cpp/en/cpp/types/enable_if.html
+
+// ambiguity in vector range constructor resolution
+https://cplusplus.github.io/LWG/issue438
