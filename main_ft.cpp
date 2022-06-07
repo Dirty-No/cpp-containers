@@ -121,17 +121,17 @@ int main_ft()
 	// (void)swap_test;
 	// (void)map_order_test;
 	// (void)map_iter_test;
-	// (void)main_subject;
-	char *argv[2];
-	std::string a1("./test");
-	std::string a2(ENTROPY);
-
-	argv[0] = &a1[0];
-	argv[1] = &a2[0];
-
 	(void)main_subject;
-	main_subject(2, (char **)argv);
-	std::cout << "Tests from subject passed" << std::endl;
+	// char *argv[2];
+	// std::string a1("./test");
+	// std::string a2(ENTROPY);
+
+	// argv[0] = &a1[0];
+	// argv[1] = &a2[0];
+
+	// (void)main_subject;
+	// main_subject(2, (char **)argv);
+	// std::cout << "Tests from subject passed" << std::endl;
 
 	test_stack();
 	std::cout << "Stack tests passed" << std::endl;

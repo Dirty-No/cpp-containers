@@ -3,3 +3,48 @@
 *.stl
 *.ft
 *.a
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/.boolSwap_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/.empty_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/.flip_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/assign_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/at_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/back_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/begin_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/capacity_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/clear_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/empty_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/end_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/erase_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/front_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/inception_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/insert_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/int_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/lmartin_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/maxSize_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/mazoise_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/nonMemberSwap_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/operator[]_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/operator=_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/other_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/popBack_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/pushBack_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/rbegin_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/relationalOperators_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/rend_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/reserve_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/resize_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/size_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/string_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/swap_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/swap_main.cpp_new.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy 2/mazoise_main.cpp
+testers/containers_test/ft.compile
+testers/containers_test/std.compile
+testers/ft_containers_monkey_tester/compile_log.sh
+testers/ft_containers_monkey_tester/bin/fifodiff
+testers/ft_containers_monkey_tester/bin/ft_containers_stack
+testers/ft_containers_monkey_tester/bin/std_containers_stack
+testers/ft_containers_monkey_tester/log/log.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/operator[]_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/operator[]_main.cpp
+testers/42TESTERS-CONTAINERS/VECTOR/mains copy/operator[]_main.cpp
