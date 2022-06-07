@@ -1,6 +1,6 @@
 #include "main.hpp"
 #include "vector.hpp"
-// #include "stack.hpp"
+#include "stack.hpp"
 // #include "map.hpp"
 #define NS ft
 
@@ -114,7 +114,7 @@ int main_ft()
 	(void)test_vector;
 	// (void)test_stack;
 	// (void)test_map;
-	 (void)test_lexicographic;
+	(void)test_lexicographic;
 	// (void)is_integral_test;
 	// (void)pair_test;
 	// (void)make_pair_test;
@@ -122,26 +122,19 @@ int main_ft()
 	// (void)map_order_test;
 	// (void)map_iter_test;
 	// (void)main_subject;
-	/*char *argv[2];
+	char *argv[2];
+	std::string a1("./test");
+	std::string a2(ENTROPY);
 
-	argv[0] = strdup("./test");
-	argv[1] = strdup(ENTROPY);
-	if (!argv[0] || !argv[1])
-	{
-		delete argv[0];
-		delete argv[1];
-		std::cerr << "Error: strdup failed" << std::endl;
-		return 1;
-	}
+	argv[0] = &a1[0];
+	argv[1] = &a2[0];
+
 	(void)main_subject;
 	main_subject(2, (char **)argv);
-	delete argv[0];
-	delete argv[1];
 	std::cout << "Tests from subject passed" << std::endl;
-	
+
 	test_stack();
 	std::cout << "Stack tests passed" << std::endl;
-	*/
 	test_vector();
 	std::cout << "Vector tests passed" << std::endl;
 	return (0);
@@ -149,10 +142,10 @@ int main_ft()
 	// map_order_test();
 	// test_map();
 	// std::cout << "Map tests passed" << std::endl;
-	// is_integral_test();
-	// std::cout << "is_integral tests passed" << std::endl;
-	// test_lexicographic();
-	// std::cout << "Lexicographic tests passed" << std::endl;
+	is_integral_test();
+	std::cout << "is_integral tests passed" << std::endl;
+	test_lexicographic();
+	std::cout << "Lexicographic tests passed" << std::endl;
 	// pair_test();
 	// std::cout << "Pair tests passed" << std::endl;
 	// make_pair_test();
