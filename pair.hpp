@@ -19,7 +19,13 @@ public:
 	template< class U1, class U2 >
 	pair( const pair<U1, U2>& __p ) : first(__p.first), second(__p.second) { }
 
+	pair& operator=( const pair& __x ) {
+		this->first = __x.first;
+		this->second = __x.second;
+	}
+
 	
+
 
 
 };
