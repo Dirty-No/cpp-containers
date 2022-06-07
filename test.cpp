@@ -12,11 +12,14 @@
 #include <vector>
 #include "vector.hpp"
 #include "stack.hpp"
+#include "pair.hpp"
 
 #define VECTOR_HPP
 #define STACK_HPP
+#define PAIR_HPP
 
 #endif // !NS
+
 
 #ifdef MAP_HPP
 template<typename K, typename T>
@@ -1241,7 +1244,7 @@ static int
 	return 0;
 }
 
-#ifdef MAP_HPP
+#ifdef PAIR_HPP
 
 static int
 	pair_test()
@@ -1264,20 +1267,6 @@ static int
 static int
 	swap_test()
 {
-	NS::pair<int, int> p1(1, 2);
-	NS::pair<int, int> p2(3, 4);
-	NS::swap(p1, p2);
-	assert(p1.first == 3);
-	assert(p1.second == 4);
-	assert(p2.first == 1);
-	assert(p2.second == 2);
-	//check that swap is not a deepcopy
-	p1.first = 5;
-	p1.second = 6;
-	assert(p1.first == 5);
-	assert(p1.second == 6);
-	assert(p2.first == 1);
-	assert(p2.second == 2);
 	//swap vectors
 	NS::vector<int> v1;
 	v1.push_back(1);
@@ -1298,6 +1287,9 @@ static int
 	assert(v2[2] == 3);
 	return 0;
 }
+#endif
+
+#ifdef MAP_HPP
 
 //map_order_test
 static int map_order_test()
