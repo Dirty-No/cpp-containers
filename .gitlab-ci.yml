@@ -1,45 +1,60 @@
-# This file is a template, and might need editing before it works on your project.
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
-
-# This is a sample GitLab CI/CD configuration file that should run without any modifications.
-# It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
-# it uses echo commands to simulate the pipeline execution.
-#
-# A pipeline is composed of independent jobs that run scripts, grouped into stages.
-# Stages run in sequential order, but jobs within stages run in parallel.
-#
-# For more information, see: https://docs.gitlab.com/ee/ci/yaml/index.html#stages
+image: silkeh/clang
 
 stages:          # List of stages for jobs, and their order of execution
-  - build
   - test
-  - deploy
 
-build-job:       # This job runs in the build stage, which runs first.
-  stage: build
-  script:
-    - echo "Compiling the code..."
-    - echo "Compile complete."
-
-unit-test-job:   # This job runs in the test stage.
+my-test:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   script:
-    - echo "Running unit tests... This will take about 60 seconds."
-    - sleep 60
-    - echo "Code coverage is 90%"
+    - make
+    - ./ft_containers.ft
 
-lint-test-job:   # This job also runs in the test stage.
-  stage: test    # It can run at the same time as unit-test-job (in parallel).
+mli-test-vector:
+  stage: test
   script:
-    - echo "Linting code... This will take about 10 seconds."
-    - sleep 10
-    - echo "No lint issues found."
+    - cd testers/containers_test
+    - echo; ! (./do.sh vector | grep "❌") 
 
-deploy-job:      # This job runs in the deploy stage.
-  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+mli-test-stack:
+  stage: test
   script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    - cd testers/containers_test
+    - echo; ! (./do.sh stack | grep "❌") 
+
+mazoise-test-vector:
+  stage: test
+  script:
+    - apt update && apt install zsh valgrind -yqq
+    - cd testers/42TESTERS-CONTAINERS
+    - |
+     echo; ! (./Run_tests.sh vector  | grep -Ev "mazoise test|reserve test" | grep "❌")        || (cd VECTOR
+        for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        exit 1)
+
+mazoise-test-stack:
+  stage: test
+  script:
+    - apt update && apt install zsh valgrind -yqq
+    - cd testers/42TESTERS-CONTAINERS
+    - |
+     echo; ! (./Run_tests.sh stack  | grep "❌") || (cd STACK
+        for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        exit 1)
+
+monkey-test-vector:
+  stage: test
+  script:
+    - cd testers/ft_containers_monkey_tester 
+    - printf "../../\ny\n\n" | ./setup.sh
+    - echo; ! (./monkey.sh vector | grep differ)
+
+monkey-test-stack:
+  stage: test
+  script:
+    - cd testers/ft_containers_monkey_tester 
+    - printf "../../\ny\n\n" | ./setup.sh
+    - echo; ! (./monkey.sh stack | grep differ)

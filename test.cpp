@@ -11,8 +11,10 @@
 #include <stack>
 #include <vector>
 #include "vector.hpp"
+#include "stack.hpp"
 
 #define VECTOR_HPP
+#define STACK_HPP
 
 #endif // !NS
 
@@ -1216,6 +1218,7 @@ static int
 	return 0;
 }
 
+#endif
 
 static int
 	is_integral_test() 
@@ -1238,6 +1241,7 @@ static int
 	return 0;
 }
 
+#ifdef MAP_HPP
 
 static int
 	pair_test()
