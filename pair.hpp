@@ -1,6 +1,8 @@
 #ifndef PAIR_HPP
 # define PAIR_HPP
 
+namespace ft {
+// https://en.cppreference.com/w/cpp/utility/pair
 template<
     class T1,
     class T2
@@ -24,10 +26,46 @@ public:
 		this->second = __x.second;
 	}
 
-	
-
-
-
 };
+
+template< class T1, class T2 >
+bool operator==(const ft::pair<T1,T2>& __x, const ft::pair<T1,T2>& __y ) {	
+	return __x.first == __y.first && __x.second == __y.second;
+}
+
+
+template< class T1, class T2 >
+bool operator!=(const ft::pair<T1,T2>& __x, const ft::pair<T1,T2>& __y ) {	
+	return __x.first != __y.first && __x.second != __y.second;
+}
+
+template< class T1, class T2 >
+bool operator<(const ft::pair<T1,T2>& __x, const ft::pair<T1,T2>& __y ) {	
+	return __x.first < __y.first 
+		|| (__x.first == __y.first && __x.second < __y.second);
+}
+
+template< class T1, class T2 >
+bool operator<=(const ft::pair<T1,T2>& __x, const ft::pair<T1,T2>& __y ) {	
+	return __x.first < __y.first 
+		|| (__x.first <= __y.first && __x.second <= __y.second);
+}
+
+template< class T1, class T2 >
+bool operator>(const ft::pair<T1,T2>& __x, const ft::pair<T1,T2>& __y ) {	
+	return __x.first > __y.first 
+		|| (__x.first == __y.first && __x.second > __y.second);
+}
+
+template< class T1, class T2 >
+bool operator>=(const ft::pair<T1,T2>& __x, const ft::pair<T1,T2>& __y ) {	
+	return __x.first > __y.first 
+		|| (__x.first == __y.first && __x.second >= __y.second);
+}
+
+template< class T1, class T2 >
+ft::pair<T1,T2> make_pair( T1 __x, T2 __u ) { return ft::pair<T1, T2>(__x, __u); }
+
+}
 
 #endif

@@ -12,6 +12,7 @@
 #include <stack>
 #include "vector.hpp"
 #include "stack.hpp"
+#include "pair.hpp"
 int main_ft();
 int main_stl();
 #endif

@@ -146,11 +146,11 @@ int main_ft()
 	std::cout << "is_integral tests passed" << std::endl;
 	test_lexicographic();
 	std::cout << "Lexicographic tests passed" << std::endl;
-	// pair_test();
-	// std::cout << "Pair tests passed" << std::endl;
-	// make_pair_test();
-	// std::cout << "Make_pair tests passed" << std::endl;
-	// swap_test();
-	// std::cout << "Swap tests passed" << std::endl;
+	pair_test();
+	std::cout << "Pair tests passed" << std::endl;
+	make_pair_test();
+	std::cout << "Make_pair tests passed" << std::endl;
+	swap_test();
+	std::cout << "Swap tests passed" << std::endl;
 	return (0);
 }

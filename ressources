@@ -31,3 +31,5 @@ https://www.enseignement.polytechnique.fr/informatique/INF478/docs/Cpp/en/cpp/ty
 
 // ambiguity in vector range constructor resolution
 https://cplusplus.github.io/LWG/issue438
+
+https://en.cppreference.com/w/cpp/utility/pair
