@@ -1,91 +1,3 @@
-/*
-#include <stdlib.h>
-#include <string.h>
-
-typedef struct btree_node {
-	int key;
-	char *value;
-	struct btree_node *left;
-	struct btree_node *right;
-} btree_node;
-
-btree_node *create_btree_node(int key, char *value) {
-	btree_node *node = malloc(sizeof(btree_node));
-	node->key = key;
-	node->left = NULL;
-	node->right = NULL;
-	node->value = strdup(value);
-	return node;
-}
-
-void delete_btree_node(btree_node *node) {
-	free(node->value);
-	free(node);
-}
-
-char *btree_find(btree_node *root, int key) {
-	if (root == NULL)
-		return NULL;
-	if (root->key == key)
-		return root->value;
-	if (key < root->key) {
-		return btree_find(root->left, key);
-	}
-	return btree_find(root->right, key);
-}
-
-int btree_insert(btree_node *root, int key, char *value)
-{
-	if (root == NULL)
-		return 1;
-	if (root->key == key)
-	{
-		free(root->value);
-		root->value = value;
-	}
-	if (key < root->key) {
-		if (root->left)
-			return btree_insert(root->left,  key, value);
-		root->left = create_btree_node(key, value);
-		return root->left ? 0 : 1;
-	}
-	if (root->right)
-		return btree_insert(root->right,  key, value);
-	root->right = create_btree_node(key, value);
-	return root->right ? 0 : 1;
-}
-
-void btree_print_pretty_as_tree(btree_node *root, int level)
-{
-	if (root == NULL)
-		return;
-	btree_print_pretty_as_tree(root->right, level + 1);
-	for (int i = 0; i < level; i++)
-		printf("\t");
-	printf("%d: %s\n", root->key, root->value);
-	btree_print_pretty_as_tree(root->left, level + 1);
-}
-
-int main(void)
-{
-	//test the tree
-	btree_node *root = create_btree_node(5, "root");
-	btree_insert(root, 3, "left3");
-	btree_insert(root, 7, "right7");
-	btree_insert(root, 2, "left2");
-	btree_insert(root, 1, "left1");
-	btree_insert(root, 4, "right4");
-	btree_insert(root, 6, "right6");
-
-	//print the tree
-	btree_print_pretty_as_tree(root, 0);
-
-	//find a value
-	char *value = btree_find(root, 3);
-	printf("3: %s\n", value);
-}
-*/
-
 // Same thing, but with a red black tree:
 #include <stdlib.h>
 #include <string.h>
@@ -128,6 +40,7 @@ rbtree_node *create_rbtree_root(int key, char *value) {
 	node->value = strdup(value);
 	node->color = BLACK;
 	global_root = node;
+	fprintf(stderr, "%d, ", key);
 	return node;
 }
 void delete_rbtree_node(rbtree_node *node) {
@@ -136,15 +49,20 @@ void delete_rbtree_node(rbtree_node *node) {
 }
 
 // Search is the same algorithm for all btrees, but height is different
-char *rb_tree_find(rbtree_node *root, int key) {
+rbtree_node *rbtree_find_node(rbtree_node *root, int key) {
 	if (root == NULL)
 		return NULL;
 	if (root->key == key)
-		return root->value;
+		return root;
 	if (key < root->key) {
-		return rb_tree_find(root->left, key);
+		return rbtree_find_node(root->left, key);
 	}
-	return rb_tree_find(root->right, key);
+	return rbtree_find_node(root->right, key);
+}
+
+char *rbtree_find(rbtree_node *root, int key) {
+	const rbtree_node *found = rbtree_find_node(root, key);
+	return found ? found->value : NULL;
 }
 
 // void rb_tree_rotate_right(rbtree_node *node)
@@ -202,7 +120,70 @@ void rb_tree_rotate_left(rbtree_node *node) {
 	printf("B: %d, Y: %d, O: %d\n", B->key, Y->key, O ? O->key : 2727272);
 }
 
+void rb_tree_rotate_right(rbtree_node *node) {
+	printf("rotating right on %d\n", node->key);
+	rbtree_node *B = node;
+	rbtree_node *Y = B->left;
+	rbtree_node *O = Y->right;
 
+	Y->parent = B->parent;
+	if (Y->parent == NULL)
+	{
+		global_root = Y;
+		Y->color = BLACK;
+	}
+	else if (Y->parent->left == B)
+		Y->parent->left = Y;
+	else
+		Y->parent->right = Y;
+		
+	Y->right = B;
+
+	B->parent = Y;
+	B->left = O;
+	if (O)
+		O->parent = B;
+
+	printf("B: %d, Y: %d, O: %d\n", B->key, Y->key, O ? O->key : 2727272);
+}
+
+void rbtree_fix_double_red_left(rbtree_node *pos)
+{
+	// pos and pos->parent are red
+	// If uncle of pos is red, push blackness down from grandparent
+
+	rbtree_node *P = pos->parent;
+	rbtree_node *G = P->parent;
+	rbtree_node *U = G->right == P ? G->left : G->right;
+
+	if (U && U->color == RED) {
+		printf("recoloring on %d\n", pos->key);
+		G->color = RED;
+		if (G->left)
+			G->left->color = BLACK;
+		if (G->right)
+			G->right->color = BLACK;
+		if (G->parent == NULL) // root case
+			G->color = BLACK;
+		else if (G->parent->color == RED)
+			rbtree_fix_double_red_left(G);
+	}
+	else
+		rb_tree_rotate_left(G);
+}
+
+void rbtree_fix_double_red_right(rbtree_node *pos)
+{
+	// pos and pos->parent are red
+	// If uncle of pos is red, push blackness down from grandparent
+
+	rbtree_node *P = pos->parent;
+	rbtree_node *G = P->parent;
+	rbtree_node *U = G->right == P ? G->left : G->right;
+
+	rb_tree_rotate_right(G);
+}
+	
 // Strategy
 // 1. Ins
 int rbtree_insert(rbtree_node *pos, int key, char *value)
@@ -214,6 +195,9 @@ int rbtree_insert(rbtree_node *pos, int key, char *value)
 	{
 		free(pos->value);
 		pos->value = value;
+
+		fprintf(stderr, "%d, ", key);
+		return 0;
 	}
 
 	// false: case 1, true: case 2
@@ -342,12 +326,20 @@ int rbtree_insert(rbtree_node *pos, int key, char *value)
 				// Case 2b: P's sibling S is red
 				// We simply recolor
 				// WIP, this case has never ocurred right now, so if it happens, we need to fix it
-				if (global_root != pos->parent)
-					pos->parent->color = RED;
 				pos->parent->right->color = BLACK;
 				pos->parent->left->color = BLACK;
+				if (global_root != pos->parent)
+				{
+					pos->parent->color = RED;
+					if (pos->parent->parent->color == RED)
+						rb_tree_rotate_right(pos->parent->parent);
+				}
+				
+				
 			}
 		}
+
+		fprintf(stderr, "%d, ", key);
 		return 0;
 	}
 
@@ -491,49 +483,106 @@ int rbtree_insert(rbtree_node *pos, int key, char *value)
 					printf("created double red on %d -> %d\n", pos->parent->parent->key, pos->parent->key);
 					// printf("double red, rotating left on %d\n", pos->parent->parent->parent->key);
 					// rb_tree_rotate_left(pos->parent->parent->parent);
-					rbtree_fix_double_red(pos->parent);
+					rbtree_fix_double_red_left(pos->parent);
 				}
 			}
 		}
 	}
+	fprintf(stderr, "%d, ", key);
 	return 0;
 }
 
-void rbtree_fix_double_red(rbtree_node *pos)
-{
-	// pos and pos->parent are red
-	// If uncle of pos is red, push blackness down from grandparent
-
-	rbtree_node *P = pos->parent;
-	rbtree_node *G = P->parent;
-	rbtree_node *U = G->right == P ? G->left : G->right;
-
-	if (U && U->color == RED) {
-		printf("recoloring on %d\n", pos->key);
-		G->color = RED;
-		if (G->left)
-			G->left->color = BLACK;
-		if (G->right)
-			G->right->color = BLACK;
-		if (G->parent == NULL) // root case
-			G->color = BLACK;
-		else if (G->parent->color == RED)
-			rbtree_fix_double_red(G);
+rbtree_node *rbtree_find_inorder_predecessor(rbtree_node *node) {
+	// rightmost internal position r of p's left subtreen
+	node = node->left;
+	while (node->right) {
+		node = node->right;
 	}
-	else
-		rb_tree_rotate_left(G);
+	return node;
 }
-	
 
-char *rbtree_find(rbtree_node *root, int key) {
-	if (root == NULL)
-		return NULL;
-	if (root->key == key)
-		return root->value;
-	if (key < root->key) {
-		return rbtree_find(root->left, key);
+void rbtree_swap_nodes(rbtree_node *__x, rbtree_node *__y) {
+	const rbtree_node __x_tmp = *__x;
+	__x->key = __y->key;
+	__x->value = __y->value;
+	__y->key = __x_tmp.key;
+	__y->value = __x_tmp.value;
+}
+
+color rb_get_node_color(rbtree_node *node)
+{
+	return node ? node->color : BLACK;
+}
+
+int rb_is_black(rbtree_node *node) {
+	return rb_get_node_color(node) == BLACK;
+}
+
+int rb_is_red(rbtree_node *node) {
+	return !rb_is_black(node);
+}
+
+//https://www.youtube.com/watch?v=_ybZCHNSFOY
+int rbtree_erase_node(rbtree_node *pos)
+{
+	if (pos == NULL)
+		return 1;
+	
+	rbtree_node *K = pos;
+	rbtree_node *P = K->parent;
+	const int isLeft = P->left == K;
+	// rbtree_node *S = isLeft ? P->right : P->left;
+	// rbtree_node *G = P->parent;
+	// const int isParentLeft = G->left == P;
+	// rbtree_node *U = isParentLeft ? G->right : G->left;
+	rbtree_node *CL = K->left;
+	rbtree_node *CR = K->right;
+
+	// case 1: K has at most one child
+	if (CL == NULL || CR == NULL) {
+		printf("Deleting case 1 on %d\n", K->key);
+		// Promote the child
+		rbtree_node *child = CL ? CL : CR;
+
+		if (isLeft)
+			P->left = child;
+		else
+			P->right = child;
+
+		if (child)
+		{		
+			// child->color = P->color;
+			child->parent = P;
+		}
+
+		if (global_root == K)
+			global_root = child;
+				
+		delete_rbtree_node(K);
+		
+		return 0;
 	}
-	return rbtree_find(root->right, key);
+
+	// case 2: K has two children
+	printf("Deleting case 2 on %d\n", K->key);
+	rbtree_node *R = rbtree_find_inorder_predecessor(K);
+	printf("Found inorder predecessor %d\n", R->key);
+
+	// printf("Before swap:\nK->left = %p, K->right= %p, K->parent= %p\nR->left= %p, R->right= %p, R->parent= %p\n", K->left, K->right, K->parent, R->left, R->right, R->parent);
+	rbtree_swap_nodes(K, R);
+	// printf("After swap:\nK->left = %p, K->right= %p, K->parent= %p\nR->left= %p, R->right= %p, R->parent= %p\n", K->left, K->right, K->parent, R->left, R->right, R->parent);
+
+	// Back to case 1
+	return rbtree_erase_node(R);
+}	
+
+int rbtree_erase(rbtree_node *root, int key)
+{
+	rbtree_node *pos = rbtree_find_node(root, key);
+	if (pos == NULL)
+		return 1;
+	rbtree_erase_node(pos);
+	return 0;
 }
 
 void rbtree_print_pretty_as_tree(rbtree_node *root, int level, char dir)
@@ -676,7 +725,6 @@ int main(void)
 	rbtree_insert(global_root, 130, "130");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
-	// last tested
 	// recolor + rotate left
 	printf("-------14---------\n");
 	rbtree_insert(global_root, 140, "140");
@@ -690,14 +738,18 @@ int main(void)
 	rbtree_insert(global_root, 32, "32");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
+	// last tested
 	printf("-------17---------\n");
 	rbtree_insert(global_root, 33, "33");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
+
+	// breaks here
 	printf("-------18---------\n");
 	rbtree_insert(global_root, 34, "34");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
+	exit(0);
 	printf("-------19---------\n");
 	rbtree_insert(global_root, 1, "1");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
@@ -714,13 +766,58 @@ int main(void)
 	rbtree_insert(global_root, 4, "4");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
-	for (int i = 500; i < 506; i++)
-	{
-		printf("-------%d---------\n", i - 500 + 23);
-		rbtree_insert(global_root, i, "i");
-		rbtree_print_pretty_as_tree(global_root, 0, 'R');
-	}
+
+	// for (int i = 500; i < 550; i++)
+	// {
+	// 	printf("-------%d---------\n", i - 500 + 23);
+	// 	rbtree_insert(global_root, i, "i");
+	// 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	// }
+	exit(0);
+	printf("-------DELETIONS---------\n");
+	printf("-------1---------\n");
+	rbtree_erase(global_root, 4);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------2---------\n");
+	rbtree_erase(global_root, 2);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------3---------\n");
+	rbtree_erase(global_root, 1);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------4---------\n");
+	rbtree_erase(global_root, 3);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------5---------\n");
+	rbtree_erase(global_root, 20);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------6---------\n");
+	rbtree_erase(global_root, 32);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------7---------\n");
+	rbtree_erase(global_root, 33);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------8---------\n");
+	rbtree_erase(global_root, 40);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	
+	printf("-------9---------\n");
+	rbtree_erase(global_root, 35);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------10---------\n");
+	rbtree_erase(global_root, 34);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	printf("-------11---------\n");
+	rbtree_erase(global_root, 50);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
 
 	//print the tree
