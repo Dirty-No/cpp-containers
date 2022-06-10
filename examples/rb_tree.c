@@ -550,15 +550,22 @@ int rbtree_erase_node(rbtree_node *pos)
 		printf("Deleting case 1 on %d\n", K->key);
 		// Promote the child
 		rbtree_node *child = CL ? CL : CR;
+		rbtree_node *U = NULL;
 
 		if (isLeft)
+		{
 			P->left = child;
+			U = P->parent->right;
+		}
 		else
+		{
 			P->right = child;
+			U = P->parent->left;
+		}
 
 		if (child)
 		{		
-			child->color = P->color;
+			// child->color = P->color;
 			child->parent = P;
 		}
 
@@ -566,7 +573,21 @@ int rbtree_erase_node(rbtree_node *pos)
 			global_root = child;
 				
 		delete_rbtree_node(K);
-		
+
+		const int isDoubleBlack = rb_is_black(P->left) && rb_is_black(P->right);
+		const int isNephewsDoubleBlack = rb_is_black(U->left) && rb_is_black(U->right);
+
+		if (isDoubleBlack && isNephewsDoubleBlack)
+		{
+			printf("dobule black, U:%d, P:%d, PL:%d\n", U->key, P->key, P->left->color);
+			P->color = BLACK;
+			if (P->left)
+				P->left->color = RED;
+			if (P->right)
+				P->right->color = RED;
+		}
+		else if (child)
+			child->color = P->color;
 		return 0;
 	}
 
@@ -786,6 +807,11 @@ int main(void)
 
 	printf("-------2---------\n");
 	rbtree_erase(global_root, 40);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+
+	exit(0);
+	printf("-------3---------\n");
+	rbtree_erase(global_root, 33);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
 	exit(0);
