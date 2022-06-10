@@ -65,29 +65,6 @@ char *rbtree_find(rbtree_node *root, int key) {
 	return found ? found->value : NULL;
 }
 
-// void rb_tree_rotate_right(rbtree_node *node)
-// {
-// 	rbtree_node old = *node;
-// 	rbtree_node *old_parent = node->parent;
-
-// 	node->parent = node->left;
-// 	node->parent->parent = old.parent;
-// 	node->parent->right = node->left;
-// 	node->left->parent = node;
-
-// 	if (node->parent == NULL)
-// 		global_root = node;
-// 	else if (node->parent->parent == NULL)
-// 		global_root = node->parent;
-// 	if (old_parent)
-// 	{
-// 		if (isLeft)
-// 			old_parent->left = node->parent;
-// 		else
-// 			old_parent->right = node->parent;
-// 	}
-// }
-
 void rb_tree_rotate_left(rbtree_node *node) {
 	printf("rotating left on %d\n", node->key);
 	rbtree_node *B = node;
@@ -181,7 +158,24 @@ void rbtree_fix_double_red_right(rbtree_node *pos)
 	rbtree_node *G = P->parent;
 	rbtree_node *U = G->right == P ? G->left : G->right;
 
-	rb_tree_rotate_right(G);
+	if (U && U->color == RED) {
+		printf("recoloring on %d\n", pos->key);
+		G->color = RED;
+		if (G->left)
+			G->left->color = BLACK;
+		if (G->right)
+			G->right->color = BLACK;
+		if (G->parent == NULL) // root case
+			G->color = BLACK;
+		else if (G->parent->color == RED)
+			rbtree_fix_double_red_right(G);
+	}
+	else
+	{
+		rb_tree_rotate_right(G);
+		rbtree_fix_double_red_left(G);
+	}
+	
 }
 	
 // Strategy
@@ -332,7 +326,7 @@ int rbtree_insert(rbtree_node *pos, int key, char *value)
 				{
 					pos->parent->color = RED;
 					if (pos->parent->parent->color == RED)
-						rb_tree_rotate_right(pos->parent->parent);
+						rbtree_fix_double_red_right(pos);
 				}
 				
 				
