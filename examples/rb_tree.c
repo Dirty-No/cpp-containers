@@ -558,7 +558,7 @@ int rbtree_erase_node(rbtree_node *pos)
 
 		if (child)
 		{		
-			// child->color = P->color;
+			child->color = P->color;
 			child->parent = P;
 		}
 
@@ -745,7 +745,6 @@ int main(void)
 	rbtree_insert(global_root, 32, "32");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
-	// last tested
 	printf("-------17---------\n");
 	rbtree_insert(global_root, 33, "33");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
@@ -763,12 +762,11 @@ int main(void)
 	rbtree_insert(global_root, 2, "2");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
-	// breaks here
+	// last tested
 	printf("-------21---------\n");
 	rbtree_insert(global_root, 3, "3");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	// printf("\n\n%d->%d->%d->%d->%d", global_root->left->key, global_root->left->left->key, global_root->left->left->left->key, global_root->left->left->left->left->key, global_root->left->left->left->left->left->key);
-	exit(0);
 
 	printf("-------22---------\n");
 	rbtree_insert(global_root, 4, "4");
@@ -781,52 +779,16 @@ int main(void)
 	// 	rbtree_insert(global_root, i, "i");
 	// 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	// }
-	exit(0);
 	printf("-------DELETIONS---------\n");
 	printf("-------1---------\n");
-	rbtree_erase(global_root, 4);
+	rbtree_erase(global_root, 10);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
 	printf("-------2---------\n");
-	rbtree_erase(global_root, 2);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	printf("-------3---------\n");
-	rbtree_erase(global_root, 1);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	printf("-------4---------\n");
-	rbtree_erase(global_root, 3);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	printf("-------5---------\n");
-	rbtree_erase(global_root, 20);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	printf("-------6---------\n");
-	rbtree_erase(global_root, 32);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	printf("-------7---------\n");
-	rbtree_erase(global_root, 33);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	printf("-------8---------\n");
 	rbtree_erase(global_root, 40);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-	
-	printf("-------9---------\n");
-	rbtree_erase(global_root, 35);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
-	printf("-------10---------\n");
-	rbtree_erase(global_root, 34);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	printf("-------11---------\n");
-	rbtree_erase(global_root, 50);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
+	exit(0);
 
 	//print the tree
 	//find a value
