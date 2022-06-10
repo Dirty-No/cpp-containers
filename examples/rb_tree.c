@@ -126,6 +126,7 @@ void rb_tree_rotate_right(rbtree_node *node) {
 
 void rbtree_fix_double_red_left(rbtree_node *pos)
 {
+	printf("fixing double red left on %d\n", pos->key);
 	// pos and pos->parent are red
 	// If uncle of pos is red, push blackness down from grandparent
 
@@ -145,12 +146,19 @@ void rbtree_fix_double_red_left(rbtree_node *pos)
 		else if (G->parent->color == RED)
 			rbtree_fix_double_red_left(G);
 	}
-	else
-		rb_tree_rotate_left(G);
+	else if (P->color == RED) {
+		printf("rotating on %d\n", pos->key);
+		if (G->left == P)
+			rb_tree_rotate_right(G);
+		else
+			rb_tree_rotate_left(G);
+	}
+		// rb_tree_rotate_left(G);
 }
 
 void rbtree_fix_double_red_right(rbtree_node *pos)
 {
+	printf("fixing double red right on %d\n", pos->key);
 	// pos and pos->parent are red
 	// If uncle of pos is red, push blackness down from grandparent
 
@@ -477,6 +485,7 @@ int rbtree_insert(rbtree_node *pos, int key, char *value)
 					printf("created double red on %d -> %d\n", pos->parent->parent->key, pos->parent->key);
 					// printf("double red, rotating left on %d\n", pos->parent->parent->parent->key);
 					// rb_tree_rotate_left(pos->parent->parent->parent);
+					
 					rbtree_fix_double_red_left(pos->parent);
 				}
 			}
@@ -738,12 +747,10 @@ int main(void)
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
 
-	// breaks here
 	printf("-------18---------\n");
 	rbtree_insert(global_root, 34, "34");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
-	exit(0);
 	printf("-------19---------\n");
 	rbtree_insert(global_root, 1, "1");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
@@ -752,9 +759,12 @@ int main(void)
 	rbtree_insert(global_root, 2, "2");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 
+	// breaks here
 	printf("-------21---------\n");
 	rbtree_insert(global_root, 3, "3");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	// printf("\n\n%d->%d->%d->%d->%d", global_root->left->key, global_root->left->left->key, global_root->left->left->left->key, global_root->left->left->left->left->key, global_root->left->left->left->left->left->key);
+	exit(0);
 
 	printf("-------22---------\n");
 	rbtree_insert(global_root, 4, "4");
