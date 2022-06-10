@@ -149,7 +149,11 @@ void rbtree_fix_double_red_left(rbtree_node *pos)
 	else if (P->color == RED) {
 		printf("rotating on %d\n", pos->key);
 		if (G->left == P)
+		{
 			rb_tree_rotate_right(G);
+			P->color = BLACK;
+			G->color = RED;
+		}
 		else
 			rb_tree_rotate_left(G);
 	}
