@@ -20,7 +20,7 @@ typedef struct rbtree_node {
 
 rbtree_node *global_root;
 
-rbtree_node *create_rbtree_node(rbtree_node *parent, int key, char *value) {
+rbtree_node *rbtree_create_node(rbtree_node *parent, int key, char *value) {
 	rbtree_node *node = malloc(sizeof(rbtree_node));
 	node->key = key;
 	node->left = NULL;
@@ -31,7 +31,7 @@ rbtree_node *create_rbtree_node(rbtree_node *parent, int key, char *value) {
 	return node;
 }
 
-rbtree_node *create_rbtree_root(int key, char *value) {
+rbtree_node *rbtree_create_root(int key, char *value) {
 	rbtree_node *node = malloc(sizeof(rbtree_node));
 	node->key = key;
 	node->left = NULL;
@@ -43,7 +43,7 @@ rbtree_node *create_rbtree_root(int key, char *value) {
 	fprintf(stderr, "%d, ", key);
 	return node;
 }
-void delete_rbtree_node(rbtree_node *node) {
+void rbtree_destroy_node(rbtree_node *node) {
 	free(node->value);
 	free(node);
 }
@@ -137,9 +137,20 @@ int rbtree_is_red(rbtree_node *h) {
 	return h && h->color == RED;
 }
 
+rbtree_node *rbtree_fix_up(rbtree_node *h) {
+	if (rbtree_is_red(h->right) && !rbtree_is_red(h->left))
+		h = rbtree_rotate_left(h);
+	if (rbtree_is_red(h->left) && rbtree_is_red(h->left->left))
+		h = rbtree_rotate_right(h);
+	if (rbtree_is_red(h->left) && rbtree_is_red(h->right))
+		rbtree_flip_colors(h);
+
+	return h;
+}
+
 rbtree_node *rbtree_insert_node(rbtree_node *h, int key, char *value) {
 	if (!h)
-		return create_rbtree_node(NULL, key, value);
+		return rbtree_create_node(NULL, key, value);
 	
 	if (key < h->key) {
 		h->left = rbtree_insert_node(h->left, key, value);
@@ -154,28 +165,125 @@ rbtree_node *rbtree_insert_node(rbtree_node *h, int key, char *value) {
 	}
 
 	// Rebalance (Leaft-leaning Red-Black Tree implementation)
-	if (rbtree_is_red(h->right) && !rbtree_is_red(h->left))
-		h = rbtree_rotate_left(h);
-	if (rbtree_is_red(h->left) && rbtree_is_red(h->left->left))
-		h = rbtree_rotate_right(h);
-	if (rbtree_is_red(h->left) && rbtree_is_red(h->right))
-		rbtree_flip_colors(h);
+	return rbtree_fix_up(h);
+}
+
+// Forward declaration
+rbtree_node * rbtree_delete_min_node(rbtree_node *h);
+
+void rbtree_delete_min() {
+	global_root = rbtree_delete_min_node(global_root);
+	global_root->color = BLACK;
+
+	rbtree_set_parent(global_root, NULL);
+	rbtree_set_parent(global_root->left, global_root);
+	rbtree_set_parent(global_root->right, global_root);
+}
+
+// Forward declaration
+rbtree_node *rbtree_move_red_left(rbtree_node *h);
+rbtree_node *rbtree_move_red_right(rbtree_node *h);
+
+
+rbtree_node * rbtree_delete_min_node(rbtree_node *h) {
+	//left-leaning Red-Black Tree implementation
+	if (!h->left)
+		return NULL;
 	
+	if (!rbtree_is_red(h->left) && !rbtree_is_red(h->left->left))
+		h = rbtree_move_red_left(h);
+	
+	h->left = rbtree_delete_min_node(h->left);
+
+	return rbtree_fix_up(h);
+}
+
+rbtree_node *rbtree_move_red_left(rbtree_node *h) {
+	rbtree_flip_colors(h);
+	if (rbtree_is_red(h->right->left)) {
+		h->right = rbtree_rotate_right(h->right);
+		h = rbtree_rotate_left(h);
+		rbtree_flip_colors(h);
+	}
 	return h;
 }
 
+rbtree_node *rbtree_move_red_right(rbtree_node *h) {
+	rbtree_flip_colors(h);
+	if (rbtree_is_red(h->left->left)) {
+		h = rbtree_rotate_right(h);
+		rbtree_flip_colors(h);
+	}
+	return h;
+}
 
+// Forward declaration
+rbtree_node * rbtree_delete_node(rbtree_node *h, int key);
+
+void rbtree_delete(int key) {
+	global_root = rbtree_delete_node(global_root, key);
+	global_root->color = BLACK;
+
+	rbtree_set_parent(global_root, NULL);
+	rbtree_set_parent(global_root->left, global_root);
+	rbtree_set_parent(global_root->right, global_root);
+}
+
+//rbtree_min
+rbtree_node *rbtree_min(rbtree_node *h) {
+	while (h->left)
+		h = h->left;
+	return h;
+}
+
+rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
+	// left-leaning Red-Black Tree implementation
+
+	if (key < h->key) {
+		if (!rbtree_is_red(h->left) && !rbtree_is_red(h->left->left))
+			h = rbtree_move_red_left(h);
+
+
+		h->left = rbtree_delete_node(h->left, key);
+		rbtree_set_parent(h->left, h);
+	} else {
+		if (rbtree_is_red(h->left))
+			h = rbtree_rotate_right(h);
+		if (key == h->key && !h->right)
+		{
+			rbtree_destroy_node(h);
+			return NULL;
+		}
+		if (!rbtree_is_red(h->right) && !rbtree_is_red(h->right->left))
+			h = rbtree_move_red_right(h);
+		if (key == h->key) {
+			rbtree_node *x = rbtree_min(h->right);
+
+			// h is replaced by x
+			// We need to free h->value
+			free(h->value);
+			h->key = x->key;
+			h->value = x->value;
+			h->right = rbtree_delete_node(h->right, x->key);
+		} else {
+			h->right = rbtree_delete_node(h->right, key);
+		}
+		rbtree_set_parent(h->right, h);
+	}
+	return rbtree_fix_up(h);
+}
+
+const char ANSI_BLACK[] = "\x1b[30m";
+const char ANSI_RED[] = "\x1b[31m";
+const char ANSI_GREEN[] = "\x1b[32m";
+const char ANSI_RESET[] = "\x1b[0m";
+
+void check_if_rbtree_is_broken(rbtree_node *root);
 
 void rbtree_print_pretty_as_tree(rbtree_node *root, int level, char dir)
 {
 	if (root == NULL)
 		return;
-
-	const char ANSI_BLACK[] = "\x1b[30m";
-	const char ANSI_RED[] = "\x1b[31m";
-	const char ANSI_RESET[] = "\x1b[0m";
-
-
 	rbtree_print_pretty_as_tree(root->left, level + 1, 'l');
 	for (int i = 0; i < level; i++)
 		printf("\t");
@@ -183,11 +291,88 @@ void rbtree_print_pretty_as_tree(rbtree_node *root, int level, char dir)
 	rbtree_print_pretty_as_tree(root->right, level + 1, 'r');
 }
 
+// Iterates trough all nodes to check if their parent is set correctly
+int check_if_rbtree_parents_are_broken(rbtree_node *root) {
+	if (root == NULL)
+		return 0;
+	if (root->parent == NULL)
+		return (root != global_root) || (check_if_rbtree_parents_are_broken(root->left) || check_if_rbtree_parents_are_broken(root->right));
+	if (root->parent->left == root->parent->right)
+		return 1;
+	if (root->parent->left == root || root->parent->right == root)
+		return check_if_rbtree_parents_are_broken(root->left) || check_if_rbtree_parents_are_broken(root->right);
+	return 1;
+}
+
+int check_if_rbtree_has_double_reds(rbtree_node *root) {
+	if (root == NULL)
+		return 0;
+	if (rbtree_is_red(root) && (rbtree_is_red(root->left) || rbtree_is_red(root->right)))
+		return 1;
+	return check_if_rbtree_has_double_reds(root->left) || check_if_rbtree_has_double_reds(root->right);
+}
+
+int count_black_nodes_from_leaf(rbtree_node *leaf) {
+	if (leaf == NULL)
+		return 0;
+	int count = 0;
+	while (leaf) {
+		if (!rbtree_is_red(leaf))
+			count++;
+		leaf = leaf->parent;
+	}
+	return count;
+}
+
+struct count_test {
+	int count;
+	int isInitialized;
+};
+
+int check_black_nodes_helper(rbtree_node *root, struct count_test *count_test) {
+	if (root == NULL)
+		return 0;
+	
+	int count = count_black_nodes_from_leaf(root);
+	if (root->left == NULL && root->right == NULL) {
+		if (count_test->isInitialized) {
+			if (count_test->count != count)
+				return 1;
+		} else {
+			count_test->count = count;
+			count_test->isInitialized = 1;
+		}
+	}
+	return check_black_nodes_helper(root->left, count_test) || check_black_nodes_helper(root->right, count_test);
+}
+
+int check_if_all_path_have_same_number_of_black_nodes(rbtree_node *root) {
+	struct count_test count_test;
+	count_test.isInitialized = 0;
+	return check_black_nodes_helper(root, &count_test);
+}
+		
+void check_if_rbtree_is_broken(rbtree_node *root) {
+	int res = 0;
+	if ((res = check_if_rbtree_parents_are_broken(root)))
+		printf("%s[KO] RBTree PARENTS ARE BROKEN%s\n", ANSI_RED, ANSI_RESET);
+	if (rbtree_is_red(root) && (res = 1))
+		printf("%s[KO] RBTree VIOLATES RULE 2 (root must be black)%s\n", ANSI_RED, ANSI_RESET);
+	if (check_if_rbtree_has_double_reds(root) && (res = 1))
+		printf("%s[KO] RBTree VIOLATES RULE 3 (no double red nodes)%s\n", ANSI_RED, ANSI_RESET);
+	if (check_if_all_path_have_same_number_of_black_nodes(root)  && (res = 1))
+		printf("%s[KO] RBTree VIOLATES RULE 4 (same number of black nodes for all paths to a leave)%s\n", ANSI_RED, ANSI_RESET);
+	if (!res)
+		printf("%s[OK] RBTree IS OK%s\n", ANSI_GREEN, ANSI_RESET);
+}
+
 int main(void)
 {
 	//test the tree
-	global_root = create_rbtree_root(0, "0");
+	global_root = rbtree_create_root(0, "0");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	/*
 															
 	        		0													
@@ -199,6 +384,8 @@ int main(void)
 	rbtree_insert(30, "30");
 	// printf ("%p %p\n", global_root->left, global_root->right);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	/*
 		  		
 	        		0
@@ -210,6 +397,8 @@ int main(void)
 	// 3rd pic
 	rbtree_insert(70, "70");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	/*                 
 	                  0
 		  		     /
@@ -222,6 +411,8 @@ int main(void)
 	// recolor 2
 	rbtree_insert(20, "20");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 		/*    
 	                   0
 		  		     /   \
@@ -235,6 +426,8 @@ int main(void)
 // 4th pic
 	rbtree_insert(10, "10");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	/*    
 	                     0
 	                    /
@@ -249,6 +442,8 @@ int main(void)
 	printf("-------5---------\n");
 	rbtree_insert(40, "40");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	/*    
 	                     0
 	                    /
@@ -268,83 +463,117 @@ int main(void)
 	printf("-------6---------\n");
 	rbtree_insert(60, "60");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	
 	// recolor
 	printf("-------7---------\n");
 	rbtree_insert(50, "50");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	
 	// normal insert
 	printf("-------8---------\n");
 	rbtree_insert(80, "80");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	
 	// 3rd pic
 	printf("-------9---------\n");
 	rbtree_insert(90, "90");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	
 	// recolor + rotate left on root
 	printf("-------10---------\n");
 	rbtree_insert(100, "100");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	
 	// last tested
 	// 3rd pic
 	printf("-------11---------\n");
 	rbtree_insert(110, "110");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	// recolor parent + uncle + grand parent + grand->
 	printf("-------12---------\n");
 	rbtree_insert(120, "120");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	// last tested
 	//3rd pic
 	printf("-------13---------\n");
 	rbtree_insert(130, "130");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	// recolor + rotate left
 	printf("-------14---------\n");
 	rbtree_insert(140, "140");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	printf("-------15---------\n");
 	rbtree_insert(35, "35");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	
 	printf("-------16---------\n");
 	rbtree_insert(32, "32");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	printf("-------17---------\n");
 	rbtree_insert(33, "33");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 
 	printf("-------18---------\n");
 	rbtree_insert(34, "34");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	printf("-------19---------\n");
 	rbtree_insert(1, "1");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	printf("-------20---------\n");
 	rbtree_insert(2, "2");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	// last tested
 	printf("-------21---------\n");
 	rbtree_insert(3, "3");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 	// printf("\n\n%d->%d->%d->%d->%d", global_root->left->key, global_root->left->left->key, global_root->left->left->left->key, global_root->left->left->left->left->key, global_root->left->left->left->left->left->key);
 
 	printf("-------22---------\n");
 	rbtree_insert(4, "4");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 
 	for (int i = 500; i < 700; i++)
@@ -352,33 +581,49 @@ int main(void)
 		printf("-------%d---------\n", i - 500 + 23);
 		rbtree_insert(i, "i");
 		rbtree_print_pretty_as_tree(global_root, 0, 'R');
+		check_if_rbtree_is_broken(global_root);
 	}
 
-	/*
 	printf("-------DELETIONS---------\n");
 	printf("-------1---------\n");
-	rbtree_erase(global_root, 10);
+	rbtree_delete(10);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
 
 	printf("-------2---------\n");
-	rbtree_erase(global_root, 40);
+	rbtree_delete(40);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
 
 	printf("-------3---------\n");
-	rbtree_erase(global_root, 33);
+	rbtree_delete(33);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
 
 	printf("-------4---------\n");
-	rbtree_erase(global_root, 60);
+	rbtree_delete(60);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
 
 	printf("-------5---------\n");
-	rbtree_erase(global_root, 130);
+	rbtree_delete(130);
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
 
+	printf ("The next error is expected\n");
+	global_root->right->color = RED; // Sabotage the tree to violate rule 4
+	check_if_rbtree_is_broken(global_root);
 
-	exit(0);
-*/
+	printf("Those two too\n");
+	global_root->right->left->color = RED; // Sabotage the tree to create double red
+	check_if_rbtree_is_broken(global_root);
+
+	printf("Those three also\n");
+	// Sabotage parents references
+	global_root->right->right->left->parent = global_root->left;
+	check_if_rbtree_is_broken(global_root);
+
 	//print the tree
 	//find a value
 	char *value = rbtree_search(3);
