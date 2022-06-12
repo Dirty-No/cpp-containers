@@ -491,6 +491,22 @@ struct rbtree_equal_range_result rbtree_equal_range(int key) {
 	return result;
 }
 
+// Used only to clear the whole tree
+void rbtree_clear_node(rbtree_node *node) {
+	if (node->left)
+		rbtree_clear_node(node->left);
+	if (node->right)
+		rbtree_clear_node(node->right);
+	free(node->value);
+	free(node);
+}
+
+void rbtree_clear() {
+	rbtree_clear_node(global_root);
+	global_leftmost = NULL;
+	global_rightmost = NULL;
+	global_root = NULL;
+}
 
 const char ANSI_BLACK[] = "\x1b[30m";
 const char ANSI_RED[] = "\x1b[31m";
@@ -916,4 +932,5 @@ int main(void)
 	//find a value
 	char *value = rbtree_search(3)->value;
 	(void)(0||printf("3: %s\n", value));
+	rbtree_clear();
 }
