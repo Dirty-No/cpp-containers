@@ -23,6 +23,9 @@ typedef struct rbtree_op_result {
 	int result;
 } rbtree_op_result;
 
+
+
+
 rbtree_node *global_root;
 size_t global_size = 0;
 
@@ -117,7 +120,7 @@ void rbtree_flip_colors(rbtree_node *h) {
 	h->right->color = h->right->color == RED ? BLACK : RED;
 }
 
-char *rbtree_search(int key) {
+rbtree_node *rbtree_search(int key) {
 	rbtree_node *x = global_root;
 	while (x) {
 		if (key < x->key)
@@ -125,7 +128,7 @@ char *rbtree_search(int key) {
 		else if (key > x->key)
 			x = x->right;
 		else
-			return x->value;
+			return x;
 	}
 	return NULL;
 }
@@ -234,6 +237,13 @@ rbtree_op_result rbtree_delete(int key) {
 rbtree_node *rbtree_min(rbtree_node *h) {
 	while (h->left)
 		h = h->left;
+	return h;
+}
+
+//rb_tree_max
+rbtree_node *rbtree_max(rbtree_node *h) {
+	while (h->right)
+		h = h->right;
 	return h;
 }
 
@@ -394,6 +404,32 @@ rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 	}
 	return rbtree_fix_up(h);
 }
+
+// Get next node in range
+// ex: if key = 5 and 6 exist, returns 6
+rbtree_node * rbtree_next(rbtree_node *pos) {
+	if (pos->right)
+		return rbtree_min(pos->right);
+	rbtree_node *p = pos->parent;
+	while (p && pos == p->right) {
+		pos = p;
+		p = p->parent;
+	}
+	return p;
+}
+
+// get previous node in range
+rbtree_node * rbtree_prev(rbtree_node *pos) {
+	if (pos->left)
+		return rbtree_max(pos->left);
+	rbtree_node *p = pos->parent;
+	while (p && pos == p->left) {
+		pos = p;
+		p = p->parent;
+	}
+	return p;
+}
+
 
 const char ANSI_BLACK[] = "\x1b[30m";
 const char ANSI_RED[] = "\x1b[31m";
@@ -757,6 +793,27 @@ int main(void)
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	check_if_rbtree_is_broken(global_root);
 
+	rbtree_node *iterator = rbtree_search(501);
+	// Test next and prev
+	(void)(0||printf("-------ITERATORS---------\n"));
+	(void)(0||printf("-------next---------\n"));
+	rbtree_node *next = rbtree_next(iterator);
+	printf ("%d\n", next->key);
+	assert(next->key == 502);
+	(void)(0||printf("-------prev---------\n"));
+	rbtree_node *prev = rbtree_prev(iterator);
+	printf ("%d\n", prev->key);
+	assert(prev->key == 500);
+
+	for (rbtree_node *it = rbtree_search(500); it != NULL; it = rbtree_next(it))
+	{
+		printf ("%d\n", it->key);
+	}
+
+	for (rbtree_node *it = rbtree_search(698); it != NULL; it = rbtree_prev(it))
+	{
+		printf ("%d\n", it->key);
+	}
 
 	(void)(0||printf ("Rule 3 and/or 4 violations are expected\n"));
 	global_root->right->color = RED; // Sabotage the tree to violate rule 4
@@ -773,6 +830,6 @@ int main(void)
 
 	//print the tree
 	//find a value
-	char *value = rbtree_search(3);
+	char *value = rbtree_search(3)->value;
 	(void)(0||printf("3: %s\n", value));
 }
