@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
+#include <assert.h>
 typedef enum {
 	RED,
 	BLACK
@@ -18,7 +18,13 @@ typedef struct rbtree_node {
 	struct rbtree_node *parent;
 } rbtree_node;
 
+typedef struct rbtree_insert_result {
+	rbtree_node *node;
+	int result;
+} rbtree_insert_result;
+
 rbtree_node *global_root;
+size_t global_size = 0;
 
 rbtree_node *rbtree_create_node(rbtree_node *parent, int key, char *value) {
 	rbtree_node *node = malloc(sizeof(rbtree_node));
@@ -40,6 +46,7 @@ rbtree_node *rbtree_create_root(int key, char *value) {
 	node->value = strdup(value);
 	node->color = BLACK;
 	global_root = node;
+	global_size = 1;
 	(void)(1||fprintf(stderr, "%d, ", key));
 	return node;
 }
@@ -121,16 +128,25 @@ char *rbtree_search(int key) {
 }
 
 // Forward declaration
-rbtree_node *rbtree_insert_node(rbtree_node *h, int key, char *value);
+rbtree_node *rbtree_insert_node(rbtree_node *h, rbtree_node **__new_node_ptr, int key, char *value);
 
-void rbtree_insert(int key, char *value) {
-	global_root = rbtree_insert_node(global_root, key, value);
+rbtree_insert_result rbtree_insert(int key, char *value) {
+	rbtree_node *inserted_node = NULL;
+	size_t old_size = global_size;
+	global_root = rbtree_insert_node(global_root, &inserted_node, key, value);
 
 	rbtree_set_parent(global_root, NULL);
 	rbtree_set_parent(global_root->left, global_root);
 	rbtree_set_parent(global_root->right, global_root);
 
 	global_root->color = BLACK;
+
+	rbtree_insert_result res;
+
+	res.node = inserted_node;
+	res.result = old_size != global_size;
+
+	return res;
 }
 
 int rbtree_is_red(rbtree_node *h) {
@@ -148,20 +164,23 @@ rbtree_node *rbtree_fix_up(rbtree_node *h) {
 	return h;
 }
 
-rbtree_node *rbtree_insert_node(rbtree_node *h, int key, char *value) {
+rbtree_node *rbtree_insert_node(rbtree_node *h, rbtree_node **__new_node_ptr, int key, char *value) {
 	if (!h)
-		return rbtree_create_node(NULL, key, value);
-	
+	{
+		global_size++;
+		return (*__new_node_ptr = rbtree_create_node(NULL, key, value));
+	}
 	if (key < h->key) {
-		h->left = rbtree_insert_node(h->left, key, value);
+		h->left = rbtree_insert_node(h->left, __new_node_ptr, key, value);
 		rbtree_set_parent(h->left, h);
 	} else if (key > h->key) {
-		h->right = rbtree_insert_node(h->right, key, value);
+		h->right = rbtree_insert_node(h->right, __new_node_ptr, key, value);
 		rbtree_set_parent(h->right, h);
 	} else {
 		// Key already exists, replace value
 		free(h->value);
 		h->value = strdup(value);
+		*__new_node_ptr = h;
 	}
 
 	// Rebalance (Leaft-leaning Red-Black Tree implementation)
@@ -490,6 +509,11 @@ void check_if_rbtree_is_broken(rbtree_node *root) {
 
 int main(void)
 {
+
+	rbtree_insert_result res;
+	res.node = NULL;
+	res.result = 0;
+
 	//test the tree
 	global_root = rbtree_create_root(0, "0");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
@@ -641,10 +665,15 @@ int main(void)
 
 	// recolor + rotate left
 	(void)(0||printf("-------14---------\n"));
-	rbtree_insert(140, "140");
+	res = rbtree_insert(140, "140");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	check_if_rbtree_is_broken(global_root);
+	assert (res.node->key == 140);
+	assert(res.result);
 
+	res = rbtree_insert(140, "140");
+	assert (res.node->key == 140);
+	assert(res.result == 0);
 
 	(void)(0||printf("-------15---------\n"));
 	rbtree_insert(35, "35");
