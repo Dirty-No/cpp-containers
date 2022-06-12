@@ -24,10 +24,11 @@ typedef struct rbtree_op_result {
 } rbtree_op_result;
 
 
-
-
 rbtree_node *global_root;
+rbtree_node *global_leftmost;
+rbtree_node *global_rightmost;
 size_t global_size = 0;
+
 
 rbtree_node *rbtree_create_node(rbtree_node *parent, int key, char *value) {
 	rbtree_node *node = malloc(sizeof(rbtree_node));
@@ -51,6 +52,8 @@ rbtree_node *rbtree_create_root(int key, char *value) {
 	global_root = node;
 	global_size = 1;
 	(void)(1||fprintf(stderr, "%d, ", key));
+	global_leftmost = node;
+	global_rightmost = node;
 	return node;
 }
 void rbtree_destroy_node(rbtree_node *node) {
@@ -179,8 +182,12 @@ rbtree_node *rbtree_insert_node(rbtree_node *h, rbtree_node **__new_node_ptr, in
 	if (key < h->key) {
 		h->left = rbtree_insert_node(h->left, __new_node_ptr, key, value);
 		rbtree_set_parent(h->left, h);
+		if (h == global_leftmost)
+			global_leftmost = *__new_node_ptr;
 	} else if (key > h->key) {
 		h->right = rbtree_insert_node(h->right, __new_node_ptr, key, value);
+		if (h == global_rightmost)
+			global_rightmost = *__new_node_ptr;
 		rbtree_set_parent(h->right, h);
 	} else {
 		// Key already exists, replace value
@@ -357,8 +364,14 @@ rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 			h = rbtree_move_red_left(h);
 
 
+		const rbtree_node *old_left = h->left;
+	
 		h->left = rbtree_delete_node(h->left, key);
 		rbtree_set_parent(h->left, h);
+
+		if (old_left == global_leftmost)
+			global_leftmost = h->left ? h->left : h;
+		
 	} else {
 		if (rbtree_is_red(h->left))
 			h = rbtree_rotate_right(h);
@@ -371,6 +384,9 @@ rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 		}
 		if (!rbtree_is_red(h->right) && !rbtree_is_red(h->right->left))
 			h = rbtree_move_red_right(h);
+
+		const rbtree_node *old_right = h->right; // save old right node to update global_rightmost
+
 		if (key == h->key) {
 			rbtree_node *x = rbtree_min(h->right);
 
@@ -401,6 +417,8 @@ rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 			h->right = rbtree_delete_node(h->right, key);
 		}
 		rbtree_set_parent(h->right, h);
+		if (old_right == global_rightmost)
+			global_rightmost = h->right ? h->right : h;
 	}
 	return rbtree_fix_up(h);
 }
@@ -757,6 +775,12 @@ int main(void)
 		check_if_rbtree_is_broken(global_root);
 	}
 
+
+	// test leftmost / rightmost
+	(void)(0||printf("-------LEFT/RIGHT MOST---------\n"));
+	assert(global_leftmost->key == 0);
+	assert(global_rightmost->key == 699);
+
 	(void)(0||printf("-------DELETIONS---------\n"));
 	(void)(0||printf("-------1---------\n"));
 	rbtree_delete(10);
@@ -814,6 +838,11 @@ int main(void)
 	{
 		printf ("%d\n", it->key);
 	}
+
+	// test leftmost / rightmost
+	(void)(0||printf("-------LEFT/RIGHT MOST after delete ---------\n"));
+	assert(global_leftmost->key == 0);
+	assert(global_rightmost->key == 698);
 
 	(void)(0||printf ("Rule 3 and/or 4 violations are expected\n"));
 	global_root->right->color = RED; // Sabotage the tree to violate rule 4
