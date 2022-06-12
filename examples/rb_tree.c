@@ -18,10 +18,10 @@ typedef struct rbtree_node {
 	struct rbtree_node *parent;
 } rbtree_node;
 
-typedef struct rbtree_insert_result {
+typedef struct rbtree_op_result {
 	rbtree_node *node;
 	int result;
-} rbtree_insert_result;
+} rbtree_op_result;
 
 rbtree_node *global_root;
 size_t global_size = 0;
@@ -51,7 +51,10 @@ rbtree_node *rbtree_create_root(int key, char *value) {
 	return node;
 }
 void rbtree_destroy_node(rbtree_node *node) {
+	printf("destoted node: %d\n", node->key);
 	free(node->value);
+	// if (node->key == 699)
+	// 	*(node->value) = "XDDDDDD CRASH ME HARDER DADDY";
 	free(node);
 }
 
@@ -130,7 +133,7 @@ char *rbtree_search(int key) {
 // Forward declaration
 rbtree_node *rbtree_insert_node(rbtree_node *h, rbtree_node **__new_node_ptr, int key, char *value);
 
-rbtree_insert_result rbtree_insert(int key, char *value) {
+rbtree_op_result rbtree_insert(int key, char *value) {
 	rbtree_node *inserted_node = NULL;
 	size_t old_size = global_size;
 	global_root = rbtree_insert_node(global_root, &inserted_node, key, value);
@@ -141,7 +144,7 @@ rbtree_insert_result rbtree_insert(int key, char *value) {
 
 	global_root->color = BLACK;
 
-	rbtree_insert_result res;
+	rbtree_op_result res;
 
 	res.node = inserted_node;
 	res.result = old_size != global_size;
@@ -187,36 +190,6 @@ rbtree_node *rbtree_insert_node(rbtree_node *h, rbtree_node **__new_node_ptr, in
 	return rbtree_fix_up(h);
 }
 
-// Forward declaration
-rbtree_node * rbtree_delete_min_node(rbtree_node *h);
-
-void rbtree_delete_min() {
-	global_root = rbtree_delete_min_node(global_root);
-	global_root->color = BLACK;
-
-	rbtree_set_parent(global_root, NULL);
-	rbtree_set_parent(global_root->left, global_root);
-	rbtree_set_parent(global_root->right, global_root);
-}
-
-// Forward declaration
-rbtree_node *rbtree_move_red_left(rbtree_node *h);
-rbtree_node *rbtree_move_red_right(rbtree_node *h);
-
-
-rbtree_node * rbtree_delete_min_node(rbtree_node *h) {
-	//left-leaning Red-Black Tree implementation
-	if (!h->left)
-		return NULL;
-	
-	if (!rbtree_is_red(h->left) && !rbtree_is_red(h->left->left))
-		h = rbtree_move_red_left(h);
-	
-	h->left = rbtree_delete_min_node(h->left);
-
-	return rbtree_fix_up(h);
-}
-
 rbtree_node *rbtree_move_red_left(rbtree_node *h) {
 	rbtree_flip_colors(h);
 	if (rbtree_is_red(h->right->left)) {
@@ -239,13 +212,22 @@ rbtree_node *rbtree_move_red_right(rbtree_node *h) {
 // Forward declaration
 rbtree_node * rbtree_delete_node(rbtree_node *h, int key);
 
-void rbtree_delete(int key) {
+rbtree_op_result rbtree_delete(int key) {
+	rbtree_op_result res;
+	size_t old_size = global_size;
+
+	res.node = NULL;
+
 	global_root = rbtree_delete_node(global_root, key);
 	global_root->color = BLACK;
 
 	rbtree_set_parent(global_root, NULL);
 	rbtree_set_parent(global_root->left, global_root);
 	rbtree_set_parent(global_root->right, global_root);
+
+	res.result = old_size == (global_size + 1);
+
+	return res;
 }
 
 //rbtree_min
@@ -360,7 +342,6 @@ void rbtree_swap_relink_nodes(rbtree_node *a, rbtree_node *b) {
 void rbtree_print_pretty_as_tree(rbtree_node *root, int level, char dir);
 rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 	// left-leaning Red-Black Tree implementation
-
 	if (key < h->key) {
 		if (!rbtree_is_red(h->left) && !rbtree_is_red(h->left->left))
 			h = rbtree_move_red_left(h);
@@ -374,6 +355,8 @@ rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 		if (key == h->key && !h->right)
 		{
 			rbtree_destroy_node(h);
+
+			global_size--;
 			return NULL;
 		}
 		if (!rbtree_is_red(h->right) && !rbtree_is_red(h->right->left))
@@ -392,17 +375,17 @@ rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 			// h->key = x->key;
 			// h->value = x->value;
 
-
 			rbtree_swap_relink_nodes(h, x);
 			rbtree_node *tmp = x;
 			x = h;
 			h = tmp;
 			x->key = h->key;
-			x->value = NULL;
-			
+			// x can keep its original value for deletion
+
 			// (void)(0||printf("after: h->parent = %p, h->left = %p, h->right = %p, h->color = %d, x->parent = %p, x->left = %p, x->right = %p, x->color = %d\n", h->parent, h->left, h->right, h->color, x->parent, x->left, x->right, x->color));
 			(void)(printf("h->key = %d, h->value = %s, h->color=%d, x->key = %d, x->value = %s, x->color=%d\n\n", h->key, h->value, h->color, x->key, x->value, x->color));
-			// exit(0);
+
+			// Original paper uses a deleteMin but this works too
 			h->right = rbtree_delete_node(h->right, x->key);
 		} else {
 			h->right = rbtree_delete_node(h->right, key);
@@ -510,7 +493,8 @@ void check_if_rbtree_is_broken(rbtree_node *root) {
 int main(void)
 {
 
-	rbtree_insert_result res;
+	rbtree_op_result res;
+	size_t old_size = 0;
 	res.node = NULL;
 	res.result = 0;
 
@@ -665,11 +649,13 @@ int main(void)
 
 	// recolor + rotate left
 	(void)(0||printf("-------14---------\n"));
+	old_size = global_size;
 	res = rbtree_insert(140, "140");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	check_if_rbtree_is_broken(global_root);
 	assert (res.node->key == 140);
 	assert(res.result);
+	assert(global_size == old_size + 1);
 
 	res = rbtree_insert(140, "140");
 	assert (res.node->key == 140);
@@ -762,7 +748,17 @@ int main(void)
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	check_if_rbtree_is_broken(global_root);
 
-	(void)(0||printf ("The next error is expected\n"));
+	(void)(0||printf("-------6---------\n"));
+	old_size = global_size;
+	res = rbtree_delete(699);
+	assert(old_size == global_size + 1);
+	assert(res.result);
+	// assert(res.node->key == 700);
+	rbtree_print_pretty_as_tree(global_root, 0, 'R');
+	check_if_rbtree_is_broken(global_root);
+
+
+	(void)(0||printf ("Rule 3 and/or 4 violations are expected\n"));
 	global_root->right->color = RED; // Sabotage the tree to violate rule 4
 	check_if_rbtree_is_broken(global_root);
 
