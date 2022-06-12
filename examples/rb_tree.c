@@ -1,4 +1,3 @@
-// Same thing, but with a red black tree:
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -390,8 +389,6 @@ rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 		if (key == h->key) {
 			rbtree_node *x = rbtree_min(h->right);
 
-
-
 			// (void)(0||printf("before: h->parent = %p, h->left = %p, h->right = %p, h->color = %d, x->parent = %p, x->left = %p, x->right = %p, x->color = %d\n", h->parent, h->left, h->right, h->color, x->parent, x->left, x->right, x->color));
 			(void)(printf("h->key = %d, h->value = %s, h->color=%d, x->key = %d, x->value = %s, x->color=%d\n", h->key, h->value, h->color, x->key, x->value, x->color));
 			
@@ -438,6 +435,8 @@ rbtree_node * rbtree_next(rbtree_node *pos) {
 
 // get previous node in range
 rbtree_node * rbtree_prev(rbtree_node *pos) {
+	if (pos == NULL)
+		pos = global_rightmost;
 	if (pos->left)
 		return rbtree_max(pos->left);
 	rbtree_node *p = pos->parent;
@@ -446,6 +445,50 @@ rbtree_node * rbtree_prev(rbtree_node *pos) {
 		p = p->parent;
 	}
 	return p;
+}
+
+// return past-the-end node
+rbtree_node * rbtree_end() {
+	return NULL;
+}
+
+rbtree_node * rbtree_begin() {
+	return global_leftmost;
+}
+
+// ) Returns a pointer to the first element that is greater than key.
+rbtree_node * rbtree_upper_bound(int key) {
+	rbtree_node *pos = global_leftmost;
+	while (pos) {
+		if (pos->key > key)
+			return pos;
+		pos = rbtree_next(pos);
+	}
+	return pos;
+}
+
+// Returns a pointer to the first element that is lower than key.
+rbtree_node * rbtree_lower_bound(int key) {
+	rbtree_node *pos = global_leftmost;
+	while (pos) {
+		if (pos->key >= key)
+			return pos;
+		pos = rbtree_next(pos);
+	}
+	return pos;
+}
+// Returns an iterator pointing to the first element that is greater than key.
+struct rbtree_equal_range_result {
+	rbtree_node *first;
+	rbtree_node *last;
+};
+
+// Returns a pair of pointers to the first elem that is not less than key and the first element that is greater than key.
+struct rbtree_equal_range_result rbtree_equal_range(int key) {
+	struct rbtree_equal_range_result result;
+	result.first = rbtree_lower_bound(key);
+	result.last = rbtree_upper_bound(key);
+	return result;
 }
 
 
@@ -543,6 +586,7 @@ void check_if_rbtree_is_broken(rbtree_node *root) {
 	// else
 	// 	exit(1);
 }
+
 
 int main(void)
 {
@@ -839,10 +883,21 @@ int main(void)
 		printf ("%d\n", it->key);
 	}
 
+	for (rbtree_node *it = rbtree_prev(rbtree_end()); it != NULL; it = rbtree_prev(it))
+	{
+		printf ("%d\n", it->key);
+	}
+
 	// test leftmost / rightmost
 	(void)(0||printf("-------LEFT/RIGHT MOST after delete ---------\n"));
 	assert(global_leftmost->key == 0);
 	assert(global_rightmost->key == 698);
+
+
+	for (rbtree_node *it = global_leftmost; it != NULL; it = rbtree_next(it))
+	{
+		printf ("%d\n", it->key);
+	}
 
 	(void)(0||printf ("Rule 3 and/or 4 violations are expected\n"));
 	global_root->right->color = RED; // Sabotage the tree to violate rule 4
