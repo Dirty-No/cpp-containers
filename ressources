@@ -32,4 +32,22 @@ https://www.enseignement.polytechnique.fr/informatique/INF478/docs/Cpp/en/cpp/ty
 // ambiguity in vector range constructor resolution
 https://cplusplus.github.io/LWG/issue438
 
-https://en.cppreference.com/w/cpp/utility/pair
+// red black trees basics
+https://www.youtube.com/watch?v=qvZGUFHWChY&list=PL9xmBV_5YoZNqDI8qfOZgzbqahCUmUEin
+
+// Basic red black tree insert operations
+https://pages.cs.wisc.edu/~cs400/readings/Red-Black-Trees/
+
+// Red black tree rules
+https://www.geeksforgeeks.org/red-black-tree-set-1-introduction-2/#:~:text=Every%20node%20has,are%20black%20nodes.
+
+
+https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+
+https://www.rose-hulman.edu/class/csse/csse230/schedule/day16/Red-Black-Trees-Removal.pdf
+
+https://www.youtube.com/watch?v=IgeJmTKQlKs&list=PLpPXw4zFa0uKKhaSz87IowJnOTzh9tiBk&index=2
+
+http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=0C50E1E9B34284E6D11757B6AB7BA0FA?doi=10.1.1.139.282&rep=rep1&type=pdf
+
+https://en.wikipedia.org/wiki/2%E2%80%933%E2%80%934_tree

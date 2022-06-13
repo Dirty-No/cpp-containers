@@ -21,6 +21,12 @@ mli-test-stack:
     - cd testers/containers_test
     - echo; ! (./do.sh stack | grep "❌") 
 
+mli-test-map:
+  stage: test
+  script:
+    - cd testers/containers_test
+    - echo; ! (./do.sh map | grep "❌") 
+
 mazoise-test-vector:
   stage: test
   script:
@@ -45,6 +51,18 @@ mazoise-test-stack:
         for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
         exit 1)
 
+mazoise-test-map:
+  stage: test
+  script:
+    - apt update && apt install zsh valgrind -yqq
+    - cd testers/42TESTERS-CONTAINERS
+    - |
+     echo; ! (./Run_tests.sh map  | grep "❌")        || (cd MAP
+        for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
+        exit 1)
+
 monkey-test-vector:
   stage: test
   script:
@@ -58,3 +76,10 @@ monkey-test-stack:
     - cd testers/ft_containers_monkey_tester 
     - printf "../../\ny\n\n" | ./setup.sh
     - echo; ! (./monkey.sh stack | grep differ)
+
+monkey-test-map:
+  stage: test
+  script:
+    - cd testers/ft_containers_monkey_tester 
+    - printf "../../\ny\n\n" | ./setup.sh
+    - echo; ! (./monkey.sh map | grep differ)
