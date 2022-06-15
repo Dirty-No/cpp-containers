@@ -844,6 +844,18 @@ template<
 			return it;
 		}
 
+		const_iterator insert( const_iterator __hint, const value_type& __val ) {
+			// if (!_M_root)
+			// 	return const_iterator(this->_M_hook, this->_M_create_root(__val));
+			
+			if (this->size() < 6)
+				return this->insert(__val).first;
+
+
+			const_iterator it(this->_M_hook,this->_M_insert_hint(__hint._M_node, __val));
+			return it;
+		}
+
 		template<class _InputIterator>
 		void insert (_InputIterator __first, _InputIterator __last) {
 			if (__first == __last)
@@ -1293,8 +1305,18 @@ template<
 			}
 			this->assert_sane();
 		}
-		
-		
+
+		void erase(const_iterator __first, const_iterator __last) {
+			while (__first != __last)
+			{
+				const_iterator __tmp = __first;
+				++__tmp;
+
+				this->erase(*__first);
+				__first = __tmp;
+			}
+			this->assert_sane();
+		}
 };
 
 //comparison operators

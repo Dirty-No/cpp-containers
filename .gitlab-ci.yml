@@ -14,18 +14,12 @@ mli-test-vector:
   script:
     - cd testers/containers_test
     - echo; ! (./do.sh vector | grep "❌") 
-
-mli-test-stack:
+monkey-test-vector:
   stage: test
   script:
-    - cd testers/containers_test
-    - echo; ! (./do.sh stack | grep "❌") 
-
-mli-test-map:
-  stage: test
-  script:
-    - cd testers/containers_test
-    - echo; ! (./do.sh map | grep "❌") 
+    - cd testers/ft_containers_monkey_tester 
+    - printf "../../\ny\n\n" | ./setup.sh
+    - echo; ! (./monkey.sh vector | grep differ)
 
 mazoise-test-vector:
   stage: test
@@ -34,26 +28,19 @@ mazoise-test-vector:
     - cd testers/42TESTERS-CONTAINERS
     - echo; ! (./Run_tests.sh vector  | grep -Ev "mazoise test|reserve test" | grep "❌")        || (cd VECTOR ; for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; exit 1)
 
+
+mli-test-stack:
+  stage: test
+  script:
+    - cd testers/containers_test
+    - echo; ! (./do.sh stack | grep "❌") 
+
 mazoise-test-stack:
   stage: test
   script:
     - apt update && apt install zsh valgrind -yqq
     - cd testers/42TESTERS-CONTAINERS
     - echo; ! (./Run_tests.sh stack  | grep "❌") || (cd STACK ; for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; exit 1)
-
-mazoise-test-map:
-  stage: test
-  script:
-    - apt update && apt install zsh valgrind -yqq
-    - cd testers/42TESTERS-CONTAINERS
-    - echo; ! (./Run_tests.sh map  | grep "❌")        || (cd MAP ; for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; exit 1)
-
-monkey-test-vector:
-  stage: test
-  script:
-    - cd testers/ft_containers_monkey_tester 
-    - printf "../../\ny\n\n" | ./setup.sh
-    - echo; ! (./monkey.sh vector | grep differ)
 
 monkey-test-stack:
   stage: test
@@ -62,9 +49,42 @@ monkey-test-stack:
     - printf "../../\ny\n\n" | ./setup.sh
     - echo; ! (./monkey.sh stack | grep differ)
 
-monkey-test-map:
+mli-test-map:
+  stage: test
+  script:
+    - cd testers/containers_test
+    - echo; ! (./do.sh map | grep "❌") 
+
+mazoise-test-map:
+  stage: test
+  script:
+    - apt update && apt install zsh valgrind -yqq
+    - cd testers/42TESTERS-CONTAINERS
+    - echo; ! (./Run_tests.sh map  | grep "❌")        || (cd MAP ; for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; exit 1)
+
+monkey-test-set:
   stage: test
   script:
     - cd testers/ft_containers_monkey_tester 
     - printf "../../\ny\n\n" | ./setup.sh
-    - echo; ! (./monkey.sh map | grep differ)
+    - echo; ! (./monkey.sh set | grep differ)
+
+mli-test-set:
+  stage: test
+  script:
+    - cd testers/containers_test
+    - echo; ! (./do.sh set | grep "❌") 
+
+mazoise-test-set:
+  stage: test
+  script:
+    - apt update && apt install zsh valgrind -yqq
+    - cd testers/42TESTERS-CONTAINERS
+    - echo; ! (./Run_tests.sh set  | grep "❌")        || (cd SET ; for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; exit 1)
+
+monkey-test-set:
+  stage: test
+  script:
+    - cd testers/ft_containers_monkey_tester 
+    - printf "../../\ny\n\n" | ./setup.sh
+    - echo; ! (./monkey.sh set | grep differ)
