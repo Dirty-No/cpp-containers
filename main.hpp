@@ -13,6 +13,7 @@
 #include "vector.hpp"
 #include "stack.hpp"
 #include "pair.hpp"
+#include "map.hpp"
 int main_ft();
 int main_stl();
 #endif

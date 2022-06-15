@@ -22,8 +22,11 @@ public:
 	pair( const pair<U1, U2>& __p ) : first(__p.first), second(__p.second) { }
 
 	pair& operator=( const pair& __x ) {
-		this->first = __x.first;
-		this->second = __x.second;
+		if ( this != &__x ) {
+			first = __x.first;
+			second = __x.second;
+		}
+		return *this;
 	}
 
 };

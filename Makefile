@@ -6,7 +6,7 @@ HEAD_FILES = $(wildcard *.hpp)
 OBJ_FILES = $(SRC_FILES:.cpp=.o)
 EXE_FILE = ft_containers.ft
 EXE_FILE_STL = ft_containers.stl
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic -g -fsanitize=address -ferror-limit=1
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic -g -fsanitize=address -ferror-limit=2
 
 
 all: $(EXE_FILE)

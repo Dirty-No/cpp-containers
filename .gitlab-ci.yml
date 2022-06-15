@@ -32,36 +32,21 @@ mazoise-test-vector:
   script:
     - apt update && apt install zsh valgrind -yqq
     - cd testers/42TESTERS-CONTAINERS
-    - |
-     echo; ! (./Run_tests.sh vector  | grep -Ev "mazoise test|reserve test" | grep "❌")        || (cd VECTOR
-        for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        exit 1)
+    - echo; ! (./Run_tests.sh vector  | grep -Ev "mazoise test|reserve test" | grep "❌")        || (cd VECTOR ; for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; exit 1)
 
 mazoise-test-stack:
   stage: test
   script:
     - apt update && apt install zsh valgrind -yqq
     - cd testers/42TESTERS-CONTAINERS
-    - |
-     echo; ! (./Run_tests.sh stack  | grep "❌") || (cd STACK
-        for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        exit 1)
+    - echo; ! (./Run_tests.sh stack  | grep "❌") || (cd STACK ; for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; exit 1)
 
 mazoise-test-map:
   stage: test
   script:
     - apt update && apt install zsh valgrind -yqq
     - cd testers/42TESTERS-CONTAINERS
-    - |
-     echo; ! (./Run_tests.sh map  | grep "❌")        || (cd MAP
-        for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done
-        exit 1)
+    - echo; ! (./Run_tests.sh map  | grep "❌")        || (cd MAP ; for i in diff/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in logs/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; for i in leak/* ;do printf "%s\n-------------------\n" "$i"; cat "$i";done ; exit 1)
 
 monkey-test-vector:
   stage: test

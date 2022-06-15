@@ -108,14 +108,14 @@ int main_stl()
 {
 	(void)test_vector;
 	(void)test_lexicographic;
-	// (void)test_stack;
-	// (void)test_map;
-	// (void)is_integral_test;
-	// (void)pair_test;
-	// (void)make_pair_test;
-	// (void)swap_test;
-	// (void)map_order_test;
-	// (void)map_iter_test;
+	(void)test_stack;
+	(void)test_map;
+	(void)is_integral_test;
+	(void)pair_test;
+	(void)make_pair_test;
+	(void)swap_test;
+	(void)map_order_test;
+	(void)map_iter_test;
 	(void)main_subject;
 	// char *argv[2];
 	// std::string a1("./test");
@@ -131,10 +131,10 @@ int main_stl()
 	std::cout << "Stack tests passed" << std::endl;
 	test_vector();
 	std::cout << "Vector tests passed" << std::endl;
-	// map_iter_test();
-	// map_order_test();
-	// test_map();
-	// std::cout << "Map tests passed" << std::endl;
+	map_iter_test();
+	map_order_test();
+	test_map();
+	std::cout << "Map tests passed" << std::endl;
 	is_integral_test();
 	std::cout << "is_integral tests passed" << std::endl;
 	test_lexicographic();

@@ -1,7 +1,8 @@
+// Same thing, but with a red black tree:
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
+
 typedef enum {
 	RED,
 	BLACK
@@ -17,17 +18,7 @@ typedef struct rbtree_node {
 	struct rbtree_node *parent;
 } rbtree_node;
 
-typedef struct rbtree_op_result {
-	rbtree_node *node;
-	int result;
-} rbtree_op_result;
-
-
 rbtree_node *global_root;
-rbtree_node *global_leftmost;
-rbtree_node *global_rightmost;
-size_t global_size = 0;
-
 
 rbtree_node *rbtree_create_node(rbtree_node *parent, int key, char *value) {
 	rbtree_node *node = malloc(sizeof(rbtree_node));
@@ -49,17 +40,11 @@ rbtree_node *rbtree_create_root(int key, char *value) {
 	node->value = strdup(value);
 	node->color = BLACK;
 	global_root = node;
-	global_size = 1;
 	(void)(1||fprintf(stderr, "%d, ", key));
-	global_leftmost = node;
-	global_rightmost = node;
 	return node;
 }
 void rbtree_destroy_node(rbtree_node *node) {
-	printf("destoted node: %d\n", node->key);
 	free(node->value);
-	// if (node->key == 699)
-	// 	*(node->value) = "XDDDDDD CRASH ME HARDER DADDY";
 	free(node);
 }
 
@@ -122,7 +107,7 @@ void rbtree_flip_colors(rbtree_node *h) {
 	h->right->color = h->right->color == RED ? BLACK : RED;
 }
 
-rbtree_node *rbtree_search(int key) {
+char *rbtree_search(int key) {
 	rbtree_node *x = global_root;
 	while (x) {
 		if (key < x->key)
@@ -130,31 +115,22 @@ rbtree_node *rbtree_search(int key) {
 		else if (key > x->key)
 			x = x->right;
 		else
-			return x;
+			return x->value;
 	}
 	return NULL;
 }
 
 // Forward declaration
-rbtree_node *rbtree_insert_node(rbtree_node *h, rbtree_node **__new_node_ptr, int key, char *value);
+rbtree_node *rbtree_insert_node(rbtree_node *h, int key, char *value);
 
-rbtree_op_result rbtree_insert(int key, char *value) {
-	rbtree_node *inserted_node = NULL;
-	size_t old_size = global_size;
-	global_root = rbtree_insert_node(global_root, &inserted_node, key, value);
+void rbtree_insert(int key, char *value) {
+	global_root = rbtree_insert_node(global_root, key, value);
 
 	rbtree_set_parent(global_root, NULL);
 	rbtree_set_parent(global_root->left, global_root);
 	rbtree_set_parent(global_root->right, global_root);
 
 	global_root->color = BLACK;
-
-	rbtree_op_result res;
-
-	res.node = inserted_node;
-	res.result = old_size != global_size;
-
-	return res;
 }
 
 int rbtree_is_red(rbtree_node *h) {
@@ -162,8 +138,6 @@ int rbtree_is_red(rbtree_node *h) {
 }
 
 rbtree_node *rbtree_fix_up(rbtree_node *h) {
-	if   (!h)
-		return NULL;
 	if (rbtree_is_red(h->right) && !rbtree_is_red(h->left))
 		h = rbtree_rotate_left(h);
 	if (rbtree_is_red(h->left) && rbtree_is_red(h->left->left))
@@ -174,59 +148,53 @@ rbtree_node *rbtree_fix_up(rbtree_node *h) {
 	return h;
 }
 
-
-rbtree_node *rbtree_insert_node(rbtree_node *h, rbtree_node **__new_node_ptr, int key, char *value) {
+rbtree_node *rbtree_insert_node(rbtree_node *h, int key, char *value) {
 	if (!h)
-	{
-		global_size++;
-		return (*__new_node_ptr = rbtree_create_node(NULL, key, value));
-	}
+		return rbtree_create_node(NULL, key, value);
+	
 	if (key < h->key) {
-		
-		h->left = rbtree_insert_node(h->left, __new_node_ptr, key, value);
-
+		h->left = rbtree_insert_node(h->left, key, value);
 		rbtree_set_parent(h->left, h);
-
-		if (h == global_leftmost)
-			global_leftmost = *__new_node_ptr;
-
 	} else if (key > h->key) {
-		h->right = rbtree_insert_node(h->right, __new_node_ptr, key, value);
-		if (h == global_rightmost)
-			global_rightmost = *__new_node_ptr;
+		h->right = rbtree_insert_node(h->right, key, value);
 		rbtree_set_parent(h->right, h);
 	} else {
 		// Key already exists, replace value
-		// No you dont, std::set/map dont insert in this case
-		// free(h->value);
-		// h->value = strdup(value);
-		*__new_node_ptr = h;
-
-		// ----------------
-
-		// rbtree_node *P = h->parent;
-		// rbtree_node *L = h->left;
-		// rbtree_node *R = h->right;
-	
-		// rbtree_destroy_node(h);
-		// rbtree_node *__tmp = h;
-		// h = rbtree_create_node(h, key, value);
-		// h->parent = P;
-		// h->left = L;
-		// h->right = R;
-		// if (P) {
-		// 	if (P->left == __tmp)
-		// 		P->left = h;
-		// 	else
-		// 		P->right = h;
-		// }
-		// rbtree_set_parent(L, h);
-		// rbtree_set_parent(R, h);
-
-		// *__new_node_ptr = h;
+		free(h->value);
+		h->value = strdup(value);
 	}
 
 	// Rebalance (Leaft-leaning Red-Black Tree implementation)
+	return rbtree_fix_up(h);
+}
+
+// Forward declaration
+rbtree_node * rbtree_delete_min_node(rbtree_node *h);
+
+void rbtree_delete_min() {
+	global_root = rbtree_delete_min_node(global_root);
+	global_root->color = BLACK;
+
+	rbtree_set_parent(global_root, NULL);
+	rbtree_set_parent(global_root->left, global_root);
+	rbtree_set_parent(global_root->right, global_root);
+}
+
+// Forward declaration
+rbtree_node *rbtree_move_red_left(rbtree_node *h);
+rbtree_node *rbtree_move_red_right(rbtree_node *h);
+
+
+rbtree_node * rbtree_delete_min_node(rbtree_node *h) {
+	//left-leaning Red-Black Tree implementation
+	if (!h->left)
+		return NULL;
+	
+	if (!rbtree_is_red(h->left) && !rbtree_is_red(h->left->left))
+		h = rbtree_move_red_left(h);
+	
+	h->left = rbtree_delete_min_node(h->left);
+
 	return rbtree_fix_up(h);
 }
 
@@ -252,35 +220,19 @@ rbtree_node *rbtree_move_red_right(rbtree_node *h) {
 // Forward declaration
 rbtree_node * rbtree_delete_node(rbtree_node *h, int key);
 
-rbtree_op_result rbtree_delete(int key) {
-	rbtree_op_result res;
-	size_t old_size = global_size;
-
-	res.node = NULL;
-
+void rbtree_delete(int key) {
 	global_root = rbtree_delete_node(global_root, key);
 	global_root->color = BLACK;
 
 	rbtree_set_parent(global_root, NULL);
 	rbtree_set_parent(global_root->left, global_root);
 	rbtree_set_parent(global_root->right, global_root);
-
-	res.result = old_size == (global_size + 1);
-
-	return res;
 }
 
 //rbtree_min
 rbtree_node *rbtree_min(rbtree_node *h) {
 	while (h->left)
 		h = h->left;
-	return h;
-}
-
-//rb_tree_max
-rbtree_node *rbtree_max(rbtree_node *h) {
-	while (h->right)
-		h = h->right;
 	return h;
 }
 
@@ -309,7 +261,6 @@ void rbtree_swap_relink_nodes(rbtree_node *a, rbtree_node *b) {
 		rbtree_set_parent(b->right, b);
 
 		a->color = bc;
-		b->color = ac;
 
 		return ;
 	}
@@ -326,7 +277,6 @@ void rbtree_swap_relink_nodes(rbtree_node *a, rbtree_node *b) {
 		rbtree_set_parent(b->left, b);
 
 		a->color = bc;
-		b->color = ac;
 
 		return ;
 	}
@@ -389,284 +339,59 @@ void rbtree_swap_relink_nodes(rbtree_node *a, rbtree_node *b) {
 void rbtree_print_pretty_as_tree(rbtree_node *root, int level, char dir);
 rbtree_node * rbtree_delete_node(rbtree_node *h, int key) {
 	// left-leaning Red-Black Tree implementation
+
 	if (key < h->key) {
 		if (!rbtree_is_red(h->left) && !rbtree_is_red(h->left->left))
 			h = rbtree_move_red_left(h);
 
 
-		const rbtree_node *old_left = h->left;
-	
 		h->left = rbtree_delete_node(h->left, key);
 		rbtree_set_parent(h->left, h);
-
-		if (old_left == global_leftmost)
-			global_leftmost = h->left ? h->left : h;
-		
 	} else {
 		if (rbtree_is_red(h->left))
 			h = rbtree_rotate_right(h);
 		if (key == h->key && !h->right)
 		{
 			rbtree_destroy_node(h);
-
-			global_size--;
 			return NULL;
 		}
 		if (!rbtree_is_red(h->right) && !rbtree_is_red(h->right->left))
 			h = rbtree_move_red_right(h);
-
-		const rbtree_node *old_right = h->right; // save old right node to update global_rightmost
-
 		if (key == h->key) {
 			rbtree_node *x = rbtree_min(h->right);
+
+
 
 			// (void)(0||printf("before: h->parent = %p, h->left = %p, h->right = %p, h->color = %d, x->parent = %p, x->left = %p, x->right = %p, x->color = %d\n", h->parent, h->left, h->right, h->color, x->parent, x->left, x->right, x->color));
 			(void)(printf("h->key = %d, h->value = %s, h->color=%d, x->key = %d, x->value = %s, x->color=%d\n", h->key, h->value, h->color, x->key, x->value, x->color));
 			
+			// h is replaced by x
+			// TODO: This invalidates iterators
+			// Rather than copying the values, we should relink the pointers
 			
-			// Life could be a dream
+			// We need to free h->value
 			// free(h->value);
 			// h->key = x->key;
 			// h->value = x->value;
+
 
 			rbtree_swap_relink_nodes(h, x);
 			rbtree_node *tmp = x;
 			x = h;
 			h = tmp;
-			// x->key = h->key;
-			// x can keep its original value for deletion
-
+			x->key = h->key;
+			x->value = NULL;
+			
 			// (void)(0||printf("after: h->parent = %p, h->left = %p, h->right = %p, h->color = %d, x->parent = %p, x->left = %p, x->right = %p, x->color = %d\n", h->parent, h->left, h->right, h->color, x->parent, x->left, x->right, x->color));
 			(void)(printf("h->key = %d, h->value = %s, h->color=%d, x->key = %d, x->value = %s, x->color=%d\n\n", h->key, h->value, h->color, x->key, x->value, x->color));
-
-			// Original paper uses a deleteMin but this works too
+			// exit(0);
 			h->right = rbtree_delete_node(h->right, x->key);
 		} else {
 			h->right = rbtree_delete_node(h->right, key);
 		}
 		rbtree_set_parent(h->right, h);
-		if (old_right == global_rightmost)
-			global_rightmost = h->right ? h->right : h;
 	}
 	return rbtree_fix_up(h);
-}
-
-// Get next node in range
-// ex: if key = 5 and 6 exist, returns 6
-rbtree_node * rbtree_next(rbtree_node *pos) {
-	if (pos->right)
-		return rbtree_min(pos->right);
-	rbtree_node *p = pos->parent;
-	while (p && pos == p->right) {
-		pos = p;
-		p = p->parent;
-	}
-	return p;
-}
-
-// get previous node in range
-rbtree_node * rbtree_prev(rbtree_node *pos) {
-	if (pos == NULL)
-		return global_rightmost;
-	if (pos->left)
-		return rbtree_max(pos->left);
-	rbtree_node *p = pos->parent;
-	while (p && pos == p->left) {
-		pos = p;
-		p = p->parent;
-	}
-	return p;
-}
-
-// return past-the-end node
-rbtree_node * rbtree_end() {
-	return NULL;
-}
-
-rbtree_node * rbtree_begin() {
-	return global_leftmost;
-}
-
-// ) Returns a pointer to the first element that is greater than key.
-rbtree_node * rbtree_upper_bound(int key) {
-	rbtree_node *pos = global_leftmost;
-	while (pos) {
-		if (pos->key > key)
-			return pos;
-		pos = rbtree_next(pos);
-	}
-	return pos;
-}
-
-// Returns a pointer to the first element that is lower than key.
-rbtree_node * rbtree_lower_bound(int key) {
-	rbtree_node *pos = global_leftmost;
-	while (pos) {
-		if (pos->key >= key)
-			return pos;
-		pos = rbtree_next(pos);
-	}
-	return pos;
-}
-// Returns an iterator pointing to the first element that is greater than key.
-struct rbtree_equal_range_result {
-	rbtree_node *first;
-	rbtree_node *last;
-};
-
-// Returns a pair of pointers to the first elem that is not less than key and the first element that is greater than key.
-struct rbtree_equal_range_result rbtree_equal_range(int key) {
-	struct rbtree_equal_range_result result;
-	result.first = rbtree_lower_bound(key);
-	result.last = rbtree_upper_bound(key);
-	return result;
-}
-
-// Used only to clear the whole tree
-void rbtree_clear_node(rbtree_node *node) {
-	if (node->left)
-		rbtree_clear_node(node->left);
-	if (node->right)
-		rbtree_clear_node(node->right);
-	free(node->value);
-	free(node);
-}
-
-void rbtree_clear() {
-	rbtree_clear_node(global_root);
-	global_leftmost = NULL;
-	global_rightmost = NULL;
-	global_root = NULL;
-	global_size = 0;
-}
-
-
-int is_fixing_needed(rbtree_node *h) {
-	if (!h)
-		return 0;
-	if (rbtree_is_red(h->right) && !rbtree_is_red(h->left))
-		return 1;
-	if (rbtree_is_red(h->left) && rbtree_is_red(h->left->left))
-		return 1;
-	if (rbtree_is_red(h->left) && rbtree_is_red(h->right))
-		return 1;
-	return 0;
-}
-
-rbtree_node *recursive_fixup_from_top(rbtree_node *h, rbtree_node *new_node) {
-	if (!h)
-		return NULL;
-	if (h == new_node)
-		return h;
-	if (h->key < new_node->key) {
-		h->right = recursive_fixup_from_top(h->right, new_node);
-		rbtree_set_parent(h->right, h);
-	} else {
-		h->left = recursive_fixup_from_top(h->left, new_node);
-		rbtree_set_parent(h->left, h);
-	}
-	return rbtree_fix_up(h);
-}
-
-rbtree_node *recursive_fixup_from_bottom(rbtree_node *h, rbtree_node *new_node) {
-
-	if (!h->parent)
-		return global_root = recursive_fixup_from_top(h, new_node);
-
-	if (is_fixing_needed(h->left))
-		h->left = recursive_fixup_from_top(h->left, new_node);
-	
-	if (is_fixing_needed(h->right))
-		h->right = recursive_fixup_from_top(h->right, new_node);
-	
-	rbtree_node *grand_parent = h->parent->parent;
-	if (!is_fixing_needed(h) && !is_fixing_needed(h->parent)
-	 && !is_fixing_needed(h->parent->left) && !is_fixing_needed(h->parent->right)
-	 && (!grand_parent || (!is_fixing_needed(grand_parent) && !is_fixing_needed(grand_parent->left)
-	 && !is_fixing_needed(grand_parent->right))))
-	{
-		printf("recursive_fixup_from_bottom: fixed up to %d\n", h->key);
-		return h;
-	}
-
-	return recursive_fixup_from_bottom(h->parent, new_node);
-}	
-
-rbtree_node *rbtree_insert_hint(rbtree_node *hint, int key, char *value) {
-	rbtree_node *lower_bound = rbtree_prev(hint);
-	rbtree_node *upper_bound = rbtree_next(hint);
-
-	printf("upper_bound: %p\n", upper_bound);
-
-	if (hint && hint->key == key)
-		return hint;
-	if (lower_bound && lower_bound->key == key)
-		return lower_bound;
-	if (upper_bound && upper_bound->key == key)
-		return upper_bound;
-	
-	printf("rbtree_insert_hint: hint %d, lower_bound %d, upper_bound %d\n", hint ? hint->key : 272727, lower_bound ? lower_bound->key : 272727, upper_bound ? upper_bound->key : 272727);
-	if (!upper_bound && key > global_rightmost->key) {
-		rbtree_node *new_node = NULL;
-		global_rightmost->right = rbtree_insert_node(global_rightmost->right, &new_node, key, value);
-		
-		rbtree_set_parent(global_rightmost->right, global_rightmost);
-		
-		// recursive_fixup_from_bottom(new_node);
-	
-		// global_root = recursive_fixup_from_top(global_root, new_node);
-
-		recursive_fixup_from_bottom(new_node, new_node);
-
-		global_root->color = BLACK;
-
-		// printf("hint1: went all the way up %d\n", tmp->key);
-		printf("hint1: root: %d\n", global_root->key);
-		global_rightmost = new_node;
-		return new_node;
-	}
-
-	if (!lower_bound && key < global_leftmost->key) {
-		rbtree_node *new_node = NULL;
-
-		global_leftmost->left = rbtree_insert_node(global_leftmost->left, &new_node, key, value);
-
-		rbtree_set_parent(global_leftmost->left, global_leftmost);
-
-		// recursive_fixup_from_bottom(new_node);
-
-		// global_root = recursive_fixup_from_top(global_root, new_node);
-
-		recursive_fixup_from_bottom(new_node, new_node);
-
-		global_root->color = BLACK;
-
-		// printf("hint2: went all the way up %d\n", tmp->key);
-		printf("hint2: root: %d\n", global_root->key);
-		global_leftmost = new_node;
-		return new_node;
-	}
-
-
-	// Check if key is in the range
-	if ((lower_bound && lower_bound->key < key) && (upper_bound && upper_bound->key > key))
-	{
-		printf("insert in bounds\n");
-		// return rbtree_insert(key, value).node;
-
-
-		rbtree_node *new_node = NULL;
-		hint->right = rbtree_insert_node(hint->right, &new_node, key, value);
-		rbtree_set_parent(hint->right, hint);
-		recursive_fixup_from_bottom(new_node, new_node);
-		global_root->color = BLACK;
-		return new_node;
-	}
-
-
-
-	printf("insert_hint: key not in range\n");
-	return rbtree_insert(key, value).node;
 }
 
 const char ANSI_BLACK[] = "\x1b[30m";
@@ -704,10 +429,7 @@ int check_if_rbtree_has_double_reds(rbtree_node *root) {
 	if (root == NULL)
 		return 0;
 	if (rbtree_is_red(root) && (rbtree_is_red(root->left) || rbtree_is_red(root->right)))
-	{
-		printf("check_if_rbtree_has_double_reds: root: %d\n", root->key);
 		return 1;
-	}
 	return check_if_rbtree_has_double_reds(root->left) || check_if_rbtree_has_double_reds(root->right);
 }
 
@@ -751,33 +473,6 @@ int check_if_all_path_have_same_number_of_black_nodes(rbtree_node *root) {
 	return check_black_nodes_helper(root, &count_test);
 }
 		
-size_t count_nodes(rbtree_node *root) {
-	if (root == NULL)
-		return 0;
-	return 1 + count_nodes(root->left) + count_nodes(root->right);
-}
-
-size_t check_if_size_is_correct(rbtree_node *root) {
-	const size_t real_size = count_nodes(root);
-	return real_size != global_size;
-}
-
-int check_if_tree_valid_as_btree(rbtree_node *root) {
-	if (root == NULL)
-		return 0;
-	if (root->left == NULL && root->right == NULL)
-		return 0;
-
-	if (root->left && root->left->key > root->key)
-		return 1;
-	if (root->right && root->right->key < root->key)
-		return 1;
-	if (root->left && root->right &&  root->left->key > root->right->key)
-		return 1;
-	return check_if_tree_valid_as_btree(root->left) || check_if_tree_valid_as_btree(root->right);
-}
-
-
 void check_if_rbtree_is_broken(rbtree_node *root) {
 	int res = 0;
 	if ((res = check_if_rbtree_parents_are_broken(root)))
@@ -788,25 +483,12 @@ void check_if_rbtree_is_broken(rbtree_node *root) {
 		(void)(0||printf("%s[KO] RBTree VIOLATES RULE 3 (no double red nodes)%s\n", ANSI_RED, ANSI_RESET));
 	if (check_if_all_path_have_same_number_of_black_nodes(root)  && (res = 1))
 		(void)(0||printf("%s[KO] RBTree VIOLATES RULE 4 (same number of black nodes for all paths to a leave)%s\n", ANSI_RED, ANSI_RESET));
-	if (check_if_size_is_correct(root) && (res = 1))
-		(void)(0||printf("%s[KO] RBTree SIZE IS BROKEN%s\n", ANSI_RED, ANSI_RESET));
-	if ((global_leftmost->key > global_rightmost->key || check_if_tree_valid_as_btree(root)) && (res = 1))
-		(void)(0||printf("%s[KO] RBTree ISNT A VALID BTREE (wrong order)%s\n", ANSI_RED, ANSI_RESET));
 	if (!res)
 		(void)(0||printf("%s[OK] RBTree IS OK%s\n", ANSI_GREEN, ANSI_RESET));
-	else
-		exit(1);
 }
-
 
 int main(void)
 {
-
-	rbtree_op_result res;
-	size_t old_size = 0;
-	res.node = NULL;
-	res.result = 0;
-
 	//test the tree
 	global_root = rbtree_create_root(0, "0");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
@@ -958,17 +640,10 @@ int main(void)
 
 	// recolor + rotate left
 	(void)(0||printf("-------14---------\n"));
-	old_size = global_size;
-	res = rbtree_insert(140, "140");
+	rbtree_insert(140, "140");
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	check_if_rbtree_is_broken(global_root);
-	assert (res.node->key == 140);
-	assert(res.result);
-	assert(global_size == old_size + 1);
 
-	res = rbtree_insert(140, "140");
-	assert (res.node->key == 140);
-	assert(res.result == 0);
 
 	(void)(0||printf("-------15---------\n"));
 	rbtree_insert(35, "35");
@@ -1026,15 +701,9 @@ int main(void)
 	{
 		(void)(0||printf("-------%d---------\n", i - 500 + 23));
 		rbtree_insert(i, "i");
-		// rbtree_print_pretty_as_tree(global_root, 0, 'R');
+		rbtree_print_pretty_as_tree(global_root, 0, 'R');
 		check_if_rbtree_is_broken(global_root);
 	}
-
-
-	// test leftmost / rightmost
-	(void)(0||printf("-------LEFT/RIGHT MOST---------\n"));
-	assert(global_leftmost->key == 0);
-	assert(global_rightmost->key == 699);
 
 	(void)(0||printf("-------DELETIONS---------\n"));
 	(void)(0||printf("-------1---------\n"));
@@ -1063,108 +732,7 @@ int main(void)
 	rbtree_print_pretty_as_tree(global_root, 0, 'R');
 	check_if_rbtree_is_broken(global_root);
 
-	(void)(0||printf("-------6---------\n"));
-	old_size = global_size;
-	res = rbtree_delete(699);
-	assert(old_size == global_size + 1);
-	assert(res.result);
-	// assert(res.node->key == 700);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-	check_if_rbtree_is_broken(global_root);
-
-	rbtree_node *iterator = rbtree_search(501);
-	// Test next and prev
-	(void)(0||printf("-------ITERATORS---------\n"));
-	(void)(0||printf("-------next---------\n"));
-	rbtree_node *next = rbtree_next(iterator);
-	printf ("%d\n", next->key);
-	assert(next->key == 502);
-	(void)(0||printf("-------prev---------\n"));
-	rbtree_node *prev = rbtree_prev(iterator);
-	printf ("%d\n", prev->key);
-	assert(prev->key == 500);
-
-	for (rbtree_node *it = rbtree_search(500); it != NULL; it = rbtree_next(it))
-	{
-		printf ("%d\n", it->key);
-	}
-
-	for (rbtree_node *it = rbtree_search(698); it != NULL; it = rbtree_prev(it))
-	{
-		printf ("%d\n", it->key);
-	}
-
-	for (rbtree_node *it = rbtree_prev(rbtree_end()); it != NULL; it = rbtree_prev(it))
-	{
-		printf ("%d\n", it->key);
-	}
-
-	// test leftmost / rightmost
-	(void)(0||printf("-------LEFT/RIGHT MOST after delete ---------\n"));
-	assert(global_leftmost->key == 0);
-	assert(global_rightmost->key == 698);
-
-
-	for (rbtree_node *it = global_leftmost; it != NULL; it = rbtree_next(it))
-	{
-		printf ("%d\n", it->key);
-	}
-
-	(void)(0||printf("------- INSERT HINT IN RIGHT ---------\n"));
-	rbtree_node *hint = global_root;
-	for (int i = 2000; i < 2500; i++)
-	{
-		printf ("%d\n", i);
-		hint = rbtree_insert_hint(hint, i, "i");
-		rbtree_insert(i, "i");
-		// rbtree_print_pretty_as_tree(global_root, 0, 'R');
-		check_if_rbtree_is_broken(global_root);
-		assert(hint->key == i);
-	}
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-	check_if_rbtree_is_broken(global_root);
-
-	(void)(0||printf("------- INSERT HINT IN MIDDLE ---------\n"));
-	for (int i = 1500; i < 2000; i++)
-	{
-		hint = rbtree_insert_hint(hint, i, "i");
-		// rbtree_insert(i, "i");
-		check_if_rbtree_is_broken(global_root);
-		printf("%d: %d\n", i, hint->key);
-		assert(hint->key == i);
-	}
-	// rbtree_print_pretty_as_tree(global_root, 0, 'R');
-	(void)(0||printf("------- INSERT HINT IN LEFT ---------\n"));
-	for (int i = -500; i > -1000; i--)
-	{
-		hint = rbtree_insert_hint(hint, i, "i");
-		check_if_rbtree_is_broken(global_root);
-		printf("%d: %d\n", i, hint->key);
-		assert(hint->key == i);
-	}
-
-	(void)(0||printf("------- INSERT HINT IN LEFT MIDDLE ---------\n"));
-	for (int i = -500; i < 0; i++)
-	{
-		hint = rbtree_insert_hint(hint, i, "i");
-		check_if_rbtree_is_broken(global_root);
-		printf("%d: %d\n", i, hint->key);
-		assert(hint->key == i);
-	}
-	// rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	(void)(0||printf("------- INSERT AT LEFTMOST ---------\n"));
-	int new_leftmost_key = global_leftmost->key - 1;
-	hint = rbtree_insert_hint(global_leftmost, new_leftmost_key, "i");
-	check_if_rbtree_is_broken(global_root);
-	printf("%d: %d\n", new_leftmost_key, hint->key);
-	assert(hint->key == new_leftmost_key);
-	assert(global_leftmost->key == new_leftmost_key);
-	rbtree_print_pretty_as_tree(global_root, 0, 'R');
-
-	// exit(0);
-
-	(void)(0||printf ("Rule 3 and/or 4 violations are expected\n"));
+	(void)(0||printf ("The next error is expected\n"));
 	global_root->right->color = RED; // Sabotage the tree to violate rule 4
 	check_if_rbtree_is_broken(global_root);
 
@@ -1179,7 +747,6 @@ int main(void)
 
 	//print the tree
 	//find a value
-	char *value = rbtree_search(3)->value;
+	char *value = rbtree_search(3);
 	(void)(0||printf("3: %s\n", value));
-	rbtree_clear();
 }

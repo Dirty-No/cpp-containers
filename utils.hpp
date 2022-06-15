@@ -324,7 +324,7 @@ class reverse_iterator {
 
     // When the given type is an iterator, return the operator->()
     template <typename _Tp>
-    static _Tp* _S_to_pointer(_Tp __t) { return __t.operator->(); }
+    static pointer _S_to_pointer(_Tp __t) { return __t.operator->(); }
 
   public:
     reverse_iterator() : current() { }
