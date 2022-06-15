@@ -13,10 +13,12 @@
 #include "vector.hpp"
 #include "stack.hpp"
 #include "pair.hpp"
+#include "map.hpp"
 
 #define VECTOR_HPP
 #define STACK_HPP
 #define PAIR_HPP
+#define MAP_HPP
 
 #endif // !NS
 
@@ -977,21 +979,12 @@ static int
 	test_map()
 {
 	NS::map<int, int> m;
-	m[1] = 1;
+	m.insert(NS::make_pair(1, 1));
 	m.erase(1);
-	assert(m.empty());
-	m[1] = 1;
-	NS::map<int, int> mm(m);
-	NS::map<int, int> mmm;
-	mmm = mm;
-	mmm.clear();
-	mm.clear();
-	std::cout << m << std::endl << "--------" << std::endl;
-	m[2] = 2;
-	std::cout << m <<  std::endl << "--------" << std::endl;
-	m[3] = 3;
-	std::cout << m << std::endl << "--------" << std::endl;
-	//check
+	m.insert(NS::make_pair(1, 1));
+	m.insert(NS::make_pair(2, 2));
+	m.insert(NS::make_pair(3, 3));
+
 	assert(m.size() == 3);
 
 	assert(m[1] == 1);
@@ -1088,6 +1081,7 @@ static int
 	m3.erase("oii");
 	//std::cout << "m2 \n" << m2 << std::endl;
 	//std::cout << "m3 \n" << m3 << std::endl;
+	std::cout << "before ==" << std::endl;
 	assert(m3 == m2);
 	assert(!(m3 != m2));
 	assert(m2 == m2);
@@ -1294,21 +1288,21 @@ static int
 //map_order_test
 static int map_order_test()
 {
-	ft::map<int, int> map;
+	NS::map<int, int> map;
 
-	map.insert(ft::pair<int, int>(10, 1));
+	map.insert(NS::pair<int, int>(10, 1));
 	std::cout << map << std::endl << "------------------------------------------------" << std::endl;
-	map.insert(ft::pair<int, int>(20, 2));
+	map.insert(NS::pair<int, int>(20, 2));
 	std::cout << map << std::endl << "------------------------------------------------" << std::endl;
-	map.insert(ft::pair<int, int>(30, 3));
+	map.insert(NS::pair<int, int>(30, 3));
 	std::cout << map << std::endl << "------------------------------------------------" << std::endl;
-	map.insert(ft::pair<int, int>(4, 40));
+	map.insert(NS::pair<int, int>(4, 40));
 	std::cout << map << std::endl << "------------------------------------------------" << std::endl;
-	map.insert(ft::pair<int, int>(5, 50));
+	map.insert(NS::pair<int, int>(5, 50));
 	std::cout << map << std::endl << "------------------------------------------------" << std::endl;
-	map.insert(ft::pair<int, int>(6, 60));
+	map.insert(NS::pair<int, int>(6, 60));
 	std::cout << map << std::endl << "------------------------------------------------" << std::endl;
-	map.insert(ft::pair<int, int>(7, 70));
+	map.insert(NS::pair<int, int>(7, 70));
 	std::cout << map << std::endl << "------------------------------------------------" << std::endl;
 	for (size_t i = 0; i < map.size(); i++)
 	{
@@ -1480,10 +1474,14 @@ static int map_iter_test()
 	assert(p3.first->first == 10);
 	assert(p3.first->second == 1);
 	//test swap
+
+	const NS::map<int, int>::size_type old_size1 = map.size();
+	const NS::map<int, int>::size_type old_size2 = map2.size();
 	map2.swap(map);
+	
 	//assert
-	assert(map2.size() == 0);
-	assert(map.size() == 6);
+	assert(map2.size() == old_size1);
+	assert(map.size() == old_size2);
 	//test lower bound again
 	NS::map<int, int>::iterator it12 = map.lower_bound(10);
 	//assert
