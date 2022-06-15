@@ -7,8 +7,12 @@
 #include <new>
 #include <typeinfo>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stddef.h>
+#include <sstream>
+
+#define my_SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
+
 
 #ifndef FT_DEBUG_VERBOSE
 // #define FT_DEBUG_VERBOSE
@@ -31,18 +35,16 @@ inline void  __throw_runtime_error(const char* __s) { (void) __s; throw (std::ru
 inline void  __throw_range_error(const char* __s) { (void) __s; throw (std::range_error(__s)); }
 inline void  __throw_overflow_error(const char* __s) { (void) __s; throw (std::overflow_error(__s)); }
 inline void  __throw_underflow_error(const char* __s) { (void) __s; throw (std::underflow_error(__s)); }
-inline void  __throw_out_of_range_fmt(const char* __fmt, ...)  {
-  const size_t __len = __builtin_strlen(__fmt);
-  // We expect at most 2 numbers, and 1 short string. The additional
-  // 512 bytes should provide more than enough space for expansion.
-  const size_t __alloca_size = __len + 512;
-  char *const __s = static_cast<char*>(__builtin_alloca(__alloca_size));
-  va_list __ap;
-  va_start(__ap, __fmt);
-  snprintf(__s, __alloca_size, __fmt, __ap);
+
+
+
+inline void  __throw_out_of_range_my_vector(size_t __n, size_t __size)  {
+  std::string __s = "vector::_M_range_check: __n "
+                        "(which is " + my_SSTR(__n) + ") >= this->size() "
+                        "(which is "+ my_SSTR(__size) +")";
   throw (std::out_of_range(__s));
-  va_end(__ap);  // Not reached.
 }
+
 
   /**
    *  These are empty types, used to distinguish different iterators.  The

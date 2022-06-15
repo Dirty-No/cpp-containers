@@ -162,13 +162,7 @@ namespace ft
             // Safety check used only from at().
             void _M_range_check(size_type __n) const {
                 if (__n >= this->size())
-                    __throw_out_of_range_fmt(
-                        "ft::vector::_M_range_check: __n "
-                        "(which is %zu) >= this->size() "
-                        "(which is %zu)",
-                        __n,
-                        this->size()
-                    );
+                    __throw_out_of_range_my_vector(__n, this->size());
             }
 
             // Realloc and insert a single element
@@ -1340,8 +1334,16 @@ namespace ft
                         , she should actually use _function_(Awesome(_int_))
                         instead of bare _function_(_int_)
                     
+
+                    This behaviour occurs in GCC because the right constructor is 
+                        marked explicit, but it is not one resolved,
+                        and since explicit only exist for constructors,
+                        its not used in the dispatched function, so it mistakenly
+                        converts the argument to value_type instead of failing
+                        to resolve the constructor.
+
                     I fixed this problem by statically checking if passed
-                     __value is the same type as value_type 
+                     __value is the same type as value_type.
 
                     I wonder if this subject's authors actually expected that
                         students would encounter this type of pretty tricky
@@ -1488,7 +1490,7 @@ IT HAS TO BE THIS WAY &@@@@@@@@@@@@@7            ....                           
             void reserve(size_type __n) {
                 // Ensure new size is allocable
                 if (__n > this->max_size())
-                    __throw_length_error("ft::vector::reserve");
+                    __throw_length_error("vector::reserve");
                 if (this->capacity() < __n) {
                     const size_type __old_size = size();
 
