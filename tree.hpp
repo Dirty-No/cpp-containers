@@ -1,22 +1,28 @@
 #include "utils.hpp"
-#include <vector>
 #include <utility>
+# ifdef _DEBUG_TREE_ASSERT_SANE
+#include <stdio.h>
+#include <assert.h>
+#include <iostream>
+#endif
+
+#ifdef _DEBUB_PRINT_TREE
 #include <stdio.h>
 #include <iostream>
-#include <assert.h>
+const char ANSI_BLACK[] = "\x1b[30m";
+const char ANSI_RED[] = "\x1b[31m";
+const char ANSI_GREEN[] = "\x1b[32m";
+const char ANSI_RESET[] = "\x1b[0m";
+#endif
+
+
 #include "pair.hpp"
-#include<map>
+
 #ifndef  RED_BLACK_HPP
 # define RED_BLACK_HPP
 
 namespace ft
 {
-
-const char ANSI_BLACK[] = "\x1b[30m";
-const char ANSI_RED[] = "\x1b[31m";
-const char ANSI_GREEN[] = "\x1b[32m";
-const char ANSI_RESET[] = "\x1b[0m";
-
 enum _Rb_color { _S_red = false, _S_black = true };
 
 template<typename _Val>
@@ -225,7 +231,6 @@ template<
 				_Rb_iterator &operator++() {
 					this->_M_node = 
 						this->_M_hook->_M_tree->_M_increment_node(this->_M_node);
-					// std::cout << "this: " << this->_M_node << std::endl;
 					return *this;
 				}
 				
@@ -631,9 +636,7 @@ template<
 			_Rb_pointer __inserted_node = NULL;
 			size_type __old_size = this->_M_size;
 			
-			// std::cout << "lol"	<< std::endl;
 			this->_M_root = _M_insert_node(this->_M_root, __inserted_node, __val);
-			// std::cout << "af"	<< std::endl;
 
 			_S_set_parent(this->_M_root, NULL);
 			_S_set_parent(this->_M_root->_M_left, this->_M_root);
@@ -641,9 +644,6 @@ template<
 
 			this->_M_root->_M_color = _S_black;
 
-			//awful
-			// this->_M_leftmost = _Rb_node_type::_S_minimum(this->_M_root);
-			// this->_M_rightmost = _Rb_node_type::_S_maximum(this->_M_root);
 			assert_sane();
 
 			return ft::make_pair(
@@ -969,7 +969,7 @@ template<
 			return __node->_M_value;
 		}
 		
-
+#ifdef _DEBUB_PRINT_TREE
 		static void _S_print_tree(_Rb_const_pointer __root, size_type __level, char __dir) {
 			if (__root == NULL)
 				return;
@@ -980,7 +980,8 @@ template<
 			std::cout<<__dir<<(__root->_M_color == _S_black ? ANSI_BLACK : ANSI_RED)<<__root->_M_value<<ANSI_RESET<<std::endl;
 			_S_print_tree(__root->_M_right, __level + 1, 'r');
 		}
-
+#endif
+# ifdef _DEBUG_TREE_ASSERT_SANE
 		static size_type _S_count_blacks_from_leaf(_Rb_pointer __leaf) {
 			if (__leaf == NULL)
 				return 0;
@@ -1058,7 +1059,9 @@ template<
 			return _Rb_node_type::_S_minimum(this->_M_root) != this->_M_leftmost;
 		}
 
+#endif
 		bool _M_check_sanity() const {
+#ifdef _DEBUG_TREE_ASSERT_SANE
 			bool res = false;
 			if ((res = this->_M_check_parents_sanity(this->_M_root)))
 				(void)(0||printf("%s[KO] RBTree PARENTS ARE BROKEN%s\n", ANSI_RED, ANSI_RESET));
@@ -1075,6 +1078,9 @@ template<
 			if (!res)
 				(void)(1||printf("%s[OK] RBTree IS OK%s\n", ANSI_GREEN, ANSI_RESET));
 			return !res;
+#else
+			return true;
+#endif
 		}
 
 		bool sane() const {
@@ -1082,7 +1088,9 @@ template<
 		}
 
 		void assert_sane() const {
+#ifdef _DEBUG_TREE_ASSERT_SANE
 			assert(this->sane());
+#endif
 		}
 
 		void print() const {
@@ -1373,163 +1381,5 @@ inline void swap(_Rb_tree<_Value, _Compare, _Alloc>& __x, _Rb_tree<_Value, _Comp
 }
 
 } // namespace ft
-/*
-int main(void) {
-	ft::_Rb_tree<int> lol;
 
-	lol.insert(27);
-
-	ft::_Rb_tree<int>::iterator lolit = lol.begin();
-	printf("%p\n", lolit._M_node);
-	printf("%d\n", *lolit);
-	lol.print();
-	for (int i = 0; i < 150; i++)
-	{
-		lol.insert(i);
-		std::cout << "------------------------------------------\n";
-		// lol.print();
-	}
-	assert(lol._M_rightmost->_M_value == 149);
-	lol.print();
-	std::cout << lol._M_leftmost->_M_value << std::endl;
-
-	std::cout << "---------ICNREMENT ------------\n";	
-	for (ft::_Rb_tree<int>::iterator it = lol.begin(); it != lol.end(); it++) {
-		std::cout << "it: " << *it << std::endl;
-	}
-
-	std::cout << "\n---------DECREMENT ------------\n";	
-	std::cout << *(--lol.end()) << std::endl;
-	for (ft::_Rb_tree<int>::iterator it = --lol.end(); it != lol.end(); it--) {
-		std::cout << "it: " << *it << std::endl;
-	}
-
-	//find
-	std::cout << "\n---------FIND ------------\n";
-	ft::_Rb_tree<int>::iterator it = lol.find(27);
-	std::cout << "it: " << *it << std::endl;
-	assert(*it == 27);
-
-	std::cout << "\n---------FIND CONST ------------\n";
-	ft::_Rb_tree<int>::const_iterator cit = lol.find(27);
-	std::cout << "cit: " << *cit << std::endl;
-	assert(*cit == 27);
-
-	std::cout << "\n---------CONST BEGIN/END------------\n";
-	for (ft::_Rb_tree<int>::const_iterator cit = lol.begin(); cit != lol.end(); cit++) {
-		std::cout << "cit: " << *cit << std::endl;
-	}
-	// const decrement
-	std::cout << "\n---------CONST DECREMENT ------------\n";
-	for (ft::_Rb_tree<int>::const_iterator cit = --lol.end(); cit != lol.end(); cit--) {
-		std::cout << "cit: " << *cit << std::endl;
-	}
-
-	std::cout << "\n--------- INSERT RANGE ------------\n";
-	std::vector<int> v;
-	for (int i = 0; i < 100; i++)
-		v.push_back(i);
-	lol.insert(v.begin(), v.end());
-	// lol.print();
-
-	std::cout << "\n--------- REVERSE ITERATOR ------------\n";
-	for (ft::_Rb_tree<int>::reverse_iterator rit = lol.rbegin(); rit != lol.rend(); rit++) {
-		std::cout << "rit: " << *rit << std::endl;
-	}
-
-	std::cout << "\n--------- CONST REVERSE ITERATOR ------------\n";
-	for (ft::_Rb_tree<int>::const_reverse_iterator crit = lol.rbegin(); crit != lol.rend(); crit++) {
-		std::cout << "crit: " << *crit << std::endl;
-	}
-
-	std::cout << "\n--------- MAX SIZE ------------\n";
-	std::cout << lol.max_size() << std::endl;
-
-	std::cout << "\n--------- COMPARISON OPERATORS ------------\n";
-	ft::_Rb_tree<int> lol2;
-	lol2.insert(27);
-	std::cout << (lol == lol2) << std::endl;
-	std::cout << (lol != lol2) << std::endl;
-	std::cout << (lol < lol2) << std::endl;
-	std::cout << (lol > lol2) << std::endl;
-	std::cout << (lol <= lol2) << std::endl;
-	std::cout << (lol >= lol2) << std::endl;
-
-	std::cout << "\n--------- SWAP ------------\n";
-	ft::_Rb_tree<int> lol3;
-	lol3.insert(27);
-	lol.swap(lol3);
-
-	std::cout << "\n--------- ERASE ------------\n";
-	lol.erase(lol.find(27));
-	// lol.print();
-
-	std::cout << "\n--------- ERASE ITERATOR ------------\n";
-	lol.erase(lol.begin());
-
-	std::cout << "\n--------- ERASE RANGE ------------\n";
-	lol.erase(lol.begin(), lol.end());
-	assert(lol.empty());
-
-	std::cout << "\n--------- MAP ------------\n";
-	ft::map<int, int> map4;
-	map4.insert(ft::make_pair(27, 27));
-	map4.insert(ft::make_pair(28, 28));
-	map4.insert(ft::make_pair(29, 29));
-	map4.insert(ft::make_pair(30, 30));
-
-	std::cout << "map4.size(): " << map4.size() << std::endl;
-	std::cout << "map4.max_size(): " << map4.max_size() << std::endl;
-	std::cout << "map4.empty(): " << map4.empty() << std::endl;
-	std::cout << "map4.find(27): " << map4.find(27)->first << std::endl;
-	std::cout << "map4.find(28): " << map4.find(28)->first << std::endl;
-	std::cout << "map4.find(29): " << map4.find(29)->first << std::endl;
-	std::cout << "map4.find(30): " << map4.find(30)->first << std::endl;
-
-	std::cout << "\n--------- MAP CONST ------------\n";
-	ft::map<int, int> const map5 = map4;
-	std::cout << "map5.size(): " << map5.size() << std::endl;
-	std::cout << "map5.max_size(): " << map5.max_size() << std::endl;
-	std::cout << "map5.empty(): " << map5.empty() << std::endl;
-	std::cout << "map5.find(27): " << map5.find(27)->first << std::endl;
-
-	std::cout << "\n--------- MAP ITERATOR ------------\n";
-	for (ft::map<int, int>::iterator it = map4.begin(); it != map4.end(); it++) {
-		std::cout << "it: " << it->first << " " << it->second << std::endl;
-	}
-
-	std::cout << "\n--------- MAP CONST ITERATOR ------------\n";
-	for (ft::map<int, int>::const_iterator it = map4.begin(); it != map4.end(); it++) {
-		std::cout << "it: " << it->first << " " << it->second << std::endl;
-	}
-
-	std::cout << "\n--------- MAP REVERSE ITERATOR ------------\n";
-	for (ft::map<int, int>::reverse_iterator it = map4.rbegin(); it != map4.rend(); it++) {
-		std::cout << "it: " << it->first << " " << it->second << std::endl;
-	}
-
-	std::cout << "\n--------- MAP CONST REVERSE ITERATOR ------------\n";
-	for (ft::map<int, int>::const_reverse_iterator it = map4.rbegin(); it != map4.rend(); it++) {
-		std::cout << "it: " << it->first << " " << it->second << std::endl;
-	}
-
-	std::cout << "\n--------- MAP INSERT ------------\n";
-	for (int i = 0; i < 100; i++)
-		map4.insert(ft::make_pair(i, i));
-		
-	std::cout << "map4.size(): " << map4.size() << std::endl;
-	std::cout << "map4.max_size(): " << map4.max_size() << std::endl;
-	std::cout << "map4.empty(): " << map4.empty() << std::endl;
-	std::cout << "map4.find(27): " << map4.find(27)->first << std::endl;
-
-
-	std::cout << "\n--------- MAP VALUE COMPARE ------------\n";
-	ft::map<int, int> map6;
-	ft::map<int, int>::value_compare vc(map6.value_comp());
-	(void)vc;
-
-
-
-}
-*/
 #endif // ! RED_BLACK_HPP
